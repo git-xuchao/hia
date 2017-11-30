@@ -11,6 +11,8 @@ import (
 )
 
 var (
+	app = cli.NewApp()
+
 	addCommand = cli.Command{
 		Name:    "hello",
 		Aliases: []string{"a"},
@@ -56,14 +58,18 @@ var (
 	}
 )
 
-func main() {
-	app := cli.NewApp()
-
+func init() {
 	app.Commands = []cli.Command{
 		addCommand,
 		completeCommand,
 		testCommand,
 	}
+}
 
-	app.Run(os.Args)
+func main() {
+
+	if err := app.Run(os.Args); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 }
