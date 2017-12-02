@@ -2,40 +2,55 @@ package main
 
 import (
 	"fmt"
-	"hia/http/httpc"
-	"hia/http/httpd"
+	"hia/http"
+	"hia/lab"
 	"hia/redis"
 	"os"
-	/*
-	 *"sort"
-	 */
 
 	"gopkg.in/urfave/cli.v1"
 )
 
-func hello_command(c *cli.Context) error {
+func helloCommand(c *cli.Context) error {
 	fmt.Println("run hello command: ", c.Args().First())
 	return nil
 }
 
-func test_net_command(c *cli.Context) error {
+func lab1Command(c *cli.Context) error {
+	fmt.Println("lab1Command: ", c.Args().First())
+	lab.Lab1Command()
+	return nil
+}
+
+func lab2Command(c *cli.Context) error {
+	fmt.Println("lab1Command: ", c.Args().First())
+	lab.Lab2Command()
+	return nil
+}
+
+func lab3Command(c *cli.Context) error {
+	fmt.Println("lab1Command: ", c.Args().First())
+	lab.Lab3Command()
+	return nil
+}
+
+func testNetCommand(c *cli.Context) error {
 	fmt.Println("test net: ", c.Args().First())
 	return nil
 }
 
-func test_redis_command(c *cli.Context) error {
+func testRedisCommand(c *cli.Context) error {
 	fmt.Println("test redis: ", c.Args().First())
 	redis.TestRedis()
 	return nil
 }
 
-func test_httpc_command(c *cli.Context) error {
-	httpc.TestHttpcCommand()
+func testHttpcCommand(c *cli.Context) error {
+	http.TestHttpcCommand()
 	return nil
 }
 
-func test_httpd_command(c *cli.Context) error {
-	httpd.TestHttpdCommand()
+func testHttpdCommand(c *cli.Context) error {
+	http.TestHttpdCommand()
 	return nil
 }
 
@@ -46,7 +61,30 @@ var (
 		Name:    "hello",
 		Aliases: []string{"a"},
 		Usage:   "hello test command",
-		Action:  hello_command,
+		Action:  helloCommand,
+	}
+
+	labCommand = cli.Command{
+		Name:    "lab",
+		Aliases: []string{"l"},
+		Usage:   "options for task templates",
+		Subcommands: []cli.Command{
+			{
+				Name:   "lab1",
+				Usage:  "lab net",
+				Action: lab1Command,
+			},
+			{
+				Name:   "lab2",
+				Usage:  "lab net",
+				Action: lab2Command,
+			},
+			{
+				Name:   "lab3",
+				Usage:  "lab net",
+				Action: lab3Command,
+			},
+		},
 	}
 
 	testCommand = cli.Command{
@@ -57,22 +95,22 @@ var (
 			{
 				Name:   "net",
 				Usage:  "test net",
-				Action: test_net_command,
+				Action: testNetCommand,
 			},
 			{
 				Name:   "redis",
 				Usage:  "test redis",
-				Action: test_redis_command,
+				Action: testRedisCommand,
 			},
 			{
 				Name:   "httpc",
 				Usage:  "test httpc",
-				Action: test_httpc_command,
+				Action: testHttpcCommand,
 			},
 			{
 				Name:   "httpd",
 				Usage:  "test httpd",
-				Action: test_httpd_command,
+				Action: testHttpdCommand,
 			},
 		},
 	}
@@ -81,6 +119,7 @@ var (
 func init() {
 	app.Commands = []cli.Command{
 		addCommand,
+		labCommand,
 		testCommand,
 	}
 }
