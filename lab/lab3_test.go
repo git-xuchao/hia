@@ -17,7 +17,6 @@ type User struct {
 }
 
 /*结构体转json*/
-
 func testStruct() (ret string, err error) {
 	user1 := &User{
 		UserName: "user1",
