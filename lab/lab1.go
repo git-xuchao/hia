@@ -69,8 +69,8 @@ func Lab1Command() {
 	test(h)
 	//test(s)//导致错误，方法需要Human类型，但传的是SuperMan类型
 	test(s.Human) //正确
-	/*
-	 *var a HumanAction = &h
-	 *a.Eat()
-	 */
+	var a HumanAction = &s
+	a.Eat()
+	a.Walk() //调用父类中的方法
+	a.Fly()
 }

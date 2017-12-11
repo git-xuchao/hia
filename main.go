@@ -27,12 +27,6 @@ func lab2Command(c *cli.Context) error {
 	return nil
 }
 
-func lab3Command(c *cli.Context) error {
-	fmt.Println("lab1Command: ", c.Args().First())
-	lab.Lab3Command()
-	return nil
-}
-
 func testNetCommand(c *cli.Context) error {
 	fmt.Println("test net: ", c.Args().First())
 	return nil
@@ -78,11 +72,6 @@ var (
 				Name:   "lab2",
 				Usage:  "lab net",
 				Action: lab2Command,
-			},
-			{
-				Name:   "lab3",
-				Usage:  "lab net",
-				Action: lab3Command,
 			},
 		},
 	}

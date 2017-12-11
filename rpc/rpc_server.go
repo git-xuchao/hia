@@ -13,11 +13,9 @@ type RpcServer interface {
 }
 
 func RpcServerTest() {
-	var serv = new(service.MathService)
-	var tcp_server = new(TcpRpcServer)
-	var server RpcServer
+	serv := new(service.MathService)
+	var server RpcServer = new(TcpRpcServer)
 
-	server = tcp_server
 	fmt.Println("start TcpRpcServer...")
 
 	server.Set("net", "tcp")
