@@ -1,9 +1,6 @@
 package myhttprouter
 
 import (
-	/*
-	 *"encoding/json"
-	 */
 	"github.com/julienschmidt/httprouter"
 )
 
