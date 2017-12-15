@@ -11,9 +11,6 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	/*
-	 *"github.com/ethereum/go-ethereum/ethclient"
-	 */
 	"github.com/ethereum/go-ethereum/rpc"
 )
 
@@ -119,6 +116,38 @@ func (this *EthClient) Call(result interface{}, method string, args ...interface
 
 func (this *EthClient) Close() {
 	this.client.Close()
+}
+
+func (this *EthClient) NewAccount(password string) string {
+	var result json.RawMessage
+	var account string
+
+	this.Call(&result, "personal_newAccount", password)
+	account = common.ToHex(result)
+
+	fmt.Printf("new account:%s\n", account)
+
+	return account
+}
+
+func (this *EthClient) ListAccounts() []string {
+	/*
+	 *var accounts []string
+	 */
+	accounts := make([]string, 4)
+
+	this.Call(&accounts, "personal_listAccounts")
+	/*
+	 *fmt.Println(accounts)
+	 */
+
+	for index, value := range accounts {
+		fmt.Printf("index=%d, value=%s\n", index, value)
+	}
+
+	fmt.Printf("slice len=%d, cap=%d", len(accounts), cap(accounts))
+
+	return accounts
 }
 
 func NewEthClient() *EthClient {

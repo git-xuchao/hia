@@ -33,6 +33,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/p2p"
 	"github.com/ethereum/go-ethereum/rpc"
 )
 
@@ -74,7 +75,7 @@ func TestClientHTTP(t *testing.T) {
 	/*
 	 *var resp interface{}
 	 */
-	var result NodeInfo
+	var result p2p.NodeInfo
 	if err := client.Call(&result, "admin_nodeInfo"); err != nil {
 		t.Fatal(err)
 	}
@@ -91,13 +92,13 @@ func TestClientHTTP(t *testing.T) {
 	fmt.Printf("enode:%s\n", result.Enode)
 }
 
-func TestClientHTTP2(t *testing.T) {
+func TestClientShowNodeInfo(t *testing.T) {
 	var client *EthClient
 	client = NewEthClient()
 	client.Dial("http://127.0.0.1:8001")
 	defer client.Close()
 
-	var result NodeInfo
+	var result p2p.NodeInfo
 	if err := client.Call(&result, "admin_nodeInfo"); err != nil {
 		t.Fatal(err)
 	}
@@ -163,4 +164,22 @@ func TestCallContact2(t *testing.T) {
 	fmt.Println("msg", msg)
 	result, _ := cli.CallContract(msg, nil)
 	fmt.Printf("result %v\n", result)
+}
+
+func TestClientNewAccount(t *testing.T) {
+	var client *EthClient
+	client = NewEthClient()
+	client.Dial("http://127.0.0.1:8001")
+	defer client.Close()
+
+	client.NewAccount("123456")
+}
+
+func TestClientListAccounts(t *testing.T) {
+	var client *EthClient
+	client = NewEthClient()
+	client.Dial("http://127.0.0.1:8001")
+	defer client.Close()
+
+	client.ListAccounts()
 }
