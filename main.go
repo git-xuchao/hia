@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
-	http "hia/http/httpraw"
-	"hia/lab"
-	"hia/redis"
 	"os"
 
 	"gopkg.in/urfave/cli.v1"
+	http "hia/http/httpraw"
+	"hia/lab"
+	"hia/redis"
 )
 
 func helloCommand(c *cli.Context) error {

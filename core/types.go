@@ -1,24 +1,28 @@
 package core
 
 import (
-	"math/big"
+	"github.com/julienschmidt/httprouter"
 )
 
-type Vedio struct {
-	URL       string
-	Name      string
-	PlayCount int
-	BuyCount  int
-	Status    bool
+type Route struct {
+	Name    string
+	Method  string
+	Pattern string
+	Handle  httprouter.Handle
 }
 
+type Routes []Route
+
 type User struct {
-	UserID          big.Int
-	Password        string
-	Type            big.Int
-	Name            string
-	EthAcount       string
-	EthPrivateKey   string
-	EthContractAddr string
-	EthContractAbi  string
+	UserName string `json:"userName"`
+	Password string `json:"password"`
+	ID       string `json:id`
+	UserType int    `json:id`
+}
+
+type VedioInfo struct {
+	ID        string `json:id`
+	UserName  string `json:userName`
+	VedioName string `json:vedioName`
+	URL       string `json:url`
 }

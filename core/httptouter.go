@@ -1,4 +1,4 @@
-package myhttprouter
+package core
 
 import (
 	"github.com/julienschmidt/httprouter"

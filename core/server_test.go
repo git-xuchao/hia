@@ -1,14 +1,15 @@
-package myhttprouter
+package core
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/julienschmidt/httprouter"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"testing"
+
+	"github.com/julienschmidt/httprouter"
 )
 
 func TestHttpRouter(t *testing.T) {

@@ -1,4 +1,4 @@
-package myhttprouter
+package core
 
 import (
 	"encoding/json"
