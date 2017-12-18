@@ -1,4 +1,4 @@
-package core
+package types
 
 import (
 	"github.com/julienschmidt/httprouter"
@@ -20,9 +20,9 @@ type User struct {
 	UserType int    `json:id`
 }
 
-type Vedio struct {
+type Video struct {
 	ID        string `json:id`
 	UserName  string `json:userName`
-	VedioName string `json:vedioName`
+	VideoName string `json:videoName`
 	URL       string `json:url`
 }

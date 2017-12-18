@@ -10,6 +10,8 @@ import (
 	"testing"
 
 	"github.com/julienschmidt/httprouter"
+
+	"hia/core/types"
 )
 
 func TestHttpRouter(t *testing.T) {
@@ -29,7 +31,7 @@ func TestHttpRouter2(t *testing.T) {
 func TestHttpRegistUser(t *testing.T) {
 	url := "http://127.0.0.1:8080/users/custom"
 
-	user := &User{
+	user := &types.User{
 		UserName: "user1",
 		Password: "123456",
 		ID:       "1581341302",
@@ -65,17 +67,17 @@ func TestHttpRegistUser(t *testing.T) {
 	fmt.Println("response Body:", string(body))
 }
 
-func TestHttpPutVedio(t *testing.T) {
-	url := "http://127.0.0.1:8080/vedios/abc.flv"
+func TestHttpPutVideo(t *testing.T) {
+	url := "http://127.0.0.1:8080/videos/abc.flv"
 
-	vedio := &Vedio{
+	video := &types.Video{
 		ID:        "1581341302",
 		UserName:  "alan",
-		URL:       "http://127.0.0.1:8080/vedios/abc.flv",
-		VedioName: "abc.flv",
+		URL:       "http://127.0.0.1:8080/videos/abc.flv",
+		VideoName: "abc.flv",
 	}
 
-	post, err := json.Marshal(vedio)
+	post, err := json.Marshal(video)
 	if err != nil {
 		fmt.Printf("json.marshal failed, err:", err)
 		return
@@ -104,17 +106,17 @@ func TestHttpPutVedio(t *testing.T) {
 	fmt.Println("response Body:", string(body))
 }
 
-func TestHttpDeleteVedio(t *testing.T) {
-	url := "http://127.0.0.1:8080/vedios/abc.flv"
+func TestHttpDeleteVideo(t *testing.T) {
+	url := "http://127.0.0.1:8080/videos/abc.flv"
 
-	vedio := &Vedio{
+	video := &types.Video{
 		ID:        "1581341302",
 		UserName:  "alan",
-		URL:       "http://127.0.0.1:8080/vedios/abc.flv",
-		VedioName: "abc.flv",
+		URL:       "http://127.0.0.1:8080/videos/abc.flv",
+		VideoName: "abc.flv",
 	}
 
-	post, err := json.Marshal(vedio)
+	post, err := json.Marshal(video)
 	if err != nil {
 		fmt.Printf("json.marshal failed, err:", err)
 		return
@@ -143,17 +145,17 @@ func TestHttpDeleteVedio(t *testing.T) {
 	fmt.Println("response Body:", string(body))
 }
 
-func TestHttpPurchaceVedio(t *testing.T) {
-	url := "http://127.0.0.1:8080/vedios/abc.flv"
+func TestHttpPurchaceVideo(t *testing.T) {
+	url := "http://127.0.0.1:8080/videos/abc.flv"
 
-	vedio := &Vedio{
+	video := &types.Video{
 		ID:        "1581341302",
 		UserName:  "alan",
-		URL:       "http://127.0.0.1:8080/vedios/abc.flv",
-		VedioName: "abc.flv",
+		URL:       "http://127.0.0.1:8080/videos/abc.flv",
+		VideoName: "abc.flv",
 	}
 
-	post, err := json.Marshal(vedio)
+	post, err := json.Marshal(video)
 	if err != nil {
 		fmt.Printf("json.marshal failed, err:", err)
 		return
@@ -182,17 +184,17 @@ func TestHttpPurchaceVedio(t *testing.T) {
 	fmt.Println("response Body:", string(body))
 }
 
-func TestHttpPlayVedio(t *testing.T) {
-	url := "http://127.0.0.1:8080/vedios/abc.flv"
+func TestHttpPlayVideo(t *testing.T) {
+	url := "http://127.0.0.1:8080/videos/abc.flv"
 
-	vedio := &Vedio{
+	video := &types.Video{
 		ID:        "1581341302",
 		UserName:  "alan",
-		URL:       "http://127.0.0.1:8080/vedios/abc.flv",
-		VedioName: "abc.flv",
+		URL:       "http://127.0.0.1:8080/videos/abc.flv",
+		VideoName: "abc.flv",
 	}
 
-	post, err := json.Marshal(vedio)
+	post, err := json.Marshal(video)
 	if err != nil {
 		fmt.Printf("json.marshal failed, err:", err)
 		return

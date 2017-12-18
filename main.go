@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"gopkg.in/urfave/cli.v1"
+	"hia/core"
 	http "hia/http/httpraw"
 	"hia/lab"
 	"hia/redis"
@@ -106,6 +107,7 @@ var (
 )
 
 func init() {
+	app.Action = core.NewServer
 	app.Commands = []cli.Command{
 		addCommand,
 		labCommand,

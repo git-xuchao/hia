@@ -4,19 +4,23 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
+	"gopkg.in/urfave/cli.v1"
+
+	"hia/core/types"
 )
 
-var routes = Routes{
-	Route{"Index", "GET", "/", index},
-	Route{"Hello", "GET", "/hello/:name", hello},
-	Route{"RegisterUser", "POST", "/users/:usertype", registerUser},
-	Route{"UploadVedio", "PUT", "/vedios/:vedioName", uploadVedio},
-	Route{"DeleteVedio", "DELETE", "/vedios/:vedioName", deleteVedio},
-	Route{"PurchaseVedio", "POST", "/vedios/:vedioName", purchaseVedio},
-	Route{"PlayVedio", "GET", "/vedios/:vedioName", playVedio},
+var routes = types.Routes{
+	types.Route{"Index", "GET", "/", index},
+	types.Route{"Hello", "GET", "/hello/:name", hello},
+	types.Route{"RegisterUser", "POST", "/users/:usertype", registerUser},
+	types.Route{"UploadVideo", "PUT", "/videos/:videoName", uploadVideo},
+	types.Route{"DeleteVideo", "DELETE", "/videos/:videoName", deleteVideo},
+	types.Route{"PurchaseVideo", "POST", "/videos/:videoName", purchaseVideo},
+	types.Route{"PlayVideo", "GET", "/videos/:videoName", playVideo},
 }
 
 func index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
@@ -28,7 +32,7 @@ func hello(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 }
 
 func registerUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	var user User
+	var user types.User
 
 	fmt.Fprintf(w, "register, usertype %s!\n", ps.ByName("usertype"))
 	fmt.Printf("register, usertype %s!\n", ps.ByName("usertype"))
@@ -46,74 +50,82 @@ func registerUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	}
 }
 
-func uploadVedio(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	var vedio Vedio
+func uploadVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	var video types.Video
 
-	fmt.Fprintf(w, "uploadVedio, vedio name %s!\n", ps.ByName("vedioName"))
-	fmt.Printf("uploadVedio, vedio name %s!\n", ps.ByName("vedioName"))
+	fmt.Fprintf(w, "uploadVideo, video name %s!\n", ps.ByName("videoName"))
+	fmt.Printf("uploadVideo, video name %s!\n", ps.ByName("videoName"))
 	body, _ := ioutil.ReadAll(r.Body)
 	body_str := string(body)
 	fmt.Println(body_str)
 
-	if err := json.Unmarshal(body, &vedio); err == nil {
-		fmt.Println("json.Unmarshal vedio")
-		fmt.Println(vedio)
+	if err := json.Unmarshal(body, &video); err == nil {
+		fmt.Println("json.Unmarshal video")
+		fmt.Println(video)
 	} else {
 		fmt.Println("json.Unmarshal err")
 		fmt.Println(err)
 	}
 }
 
-func deleteVedio(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	var vedio Vedio
+func deleteVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	var video types.Video
 
-	fmt.Fprintf(w, "deleteVedio, vedio name %s!\n", ps.ByName("vedioName"))
-	fmt.Printf("deleteVedio, vedio name %s!\n", ps.ByName("vedioName"))
+	fmt.Fprintf(w, "deleteVideo, video name %s!\n", ps.ByName("videoName"))
+	fmt.Printf("deleteVideo, video name %s!\n", ps.ByName("videoName"))
 	body, _ := ioutil.ReadAll(r.Body)
 	body_str := string(body)
 	fmt.Println(body_str)
 
-	if err := json.Unmarshal(body, &vedio); err == nil {
-		fmt.Println("json.Unmarshal vedio")
-		fmt.Println(vedio)
+	if err := json.Unmarshal(body, &video); err == nil {
+		fmt.Println("json.Unmarshal video")
+		fmt.Println(video)
 	} else {
 		fmt.Println("json.Unmarshal err")
 		fmt.Println(err)
 	}
 }
 
-func purchaseVedio(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	var vedio Vedio
+func purchaseVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	var video types.Video
 
-	fmt.Fprintf(w, "purchaseVedio, vedio name %s!\n", ps.ByName("vedioName"))
-	fmt.Printf("purchaseVedio, vedio name %s!\n", ps.ByName("vedioName"))
+	fmt.Fprintf(w, "purchaseVideo, video name %s!\n", ps.ByName("videoName"))
+	fmt.Printf("purchaseVideo, video name %s!\n", ps.ByName("videoName"))
 	body, _ := ioutil.ReadAll(r.Body)
 	body_str := string(body)
 	fmt.Println(body_str)
 
-	if err := json.Unmarshal(body, &vedio); err == nil {
-		fmt.Println("json.Unmarshal vedio")
-		fmt.Println(vedio)
+	if err := json.Unmarshal(body, &video); err == nil {
+		fmt.Println("json.Unmarshal video")
+		fmt.Println(video)
 	} else {
 		fmt.Println("json.Unmarshal err")
 		fmt.Println(err)
 	}
 }
 
-func playVedio(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	var vedio Vedio
+func playVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	var video types.Video
 
-	fmt.Fprintf(w, "playVedio, vedio name %s!\n", ps.ByName("vedioName"))
-	fmt.Printf("playVedio, vedio name %s!\n", ps.ByName("vedioName"))
+	fmt.Fprintf(w, "playVideo, video name %s!\n", ps.ByName("videoName"))
+	fmt.Printf("playVideo, video name %s!\n", ps.ByName("videoName"))
 	body, _ := ioutil.ReadAll(r.Body)
 	body_str := string(body)
 	fmt.Println(body_str)
 
-	if err := json.Unmarshal(body, &vedio); err == nil {
-		fmt.Println("json.Unmarshal vedio")
-		fmt.Println(vedio)
+	if err := json.Unmarshal(body, &video); err == nil {
+		fmt.Println("json.Unmarshal video")
+		fmt.Println(video)
 	} else {
 		fmt.Println("json.Unmarshal err")
 		fmt.Println(err)
 	}
+}
+
+func NewServer(ctx *cli.Context) error {
+	router := NewHttpRouter()
+
+	log.Fatal(http.ListenAndServe(":8080", router))
+
+	return nil
 }
