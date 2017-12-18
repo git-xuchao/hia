@@ -68,7 +68,7 @@ func TestHttpRegistUser(t *testing.T) {
 func TestHttpPutVedio(t *testing.T) {
 	url := "http://127.0.0.1:8080/vedios/abc.flv"
 
-	vedio := &VedioInfo{
+	vedio := &Vedio{
 		ID:        "1581341302",
 		UserName:  "alan",
 		URL:       "http://127.0.0.1:8080/vedios/abc.flv",
@@ -107,7 +107,7 @@ func TestHttpPutVedio(t *testing.T) {
 func TestHttpDeleteVedio(t *testing.T) {
 	url := "http://127.0.0.1:8080/vedios/abc.flv"
 
-	vedio := &VedioInfo{
+	vedio := &Vedio{
 		ID:        "1581341302",
 		UserName:  "alan",
 		URL:       "http://127.0.0.1:8080/vedios/abc.flv",
@@ -146,7 +146,7 @@ func TestHttpDeleteVedio(t *testing.T) {
 func TestHttpPurchaceVedio(t *testing.T) {
 	url := "http://127.0.0.1:8080/vedios/abc.flv"
 
-	vedio := &VedioInfo{
+	vedio := &Vedio{
 		ID:        "1581341302",
 		UserName:  "alan",
 		URL:       "http://127.0.0.1:8080/vedios/abc.flv",
@@ -185,7 +185,7 @@ func TestHttpPurchaceVedio(t *testing.T) {
 func TestHttpPlayVedio(t *testing.T) {
 	url := "http://127.0.0.1:8080/vedios/abc.flv"
 
-	vedio := &VedioInfo{
+	vedio := &Vedio{
 		ID:        "1581341302",
 		UserName:  "alan",
 		URL:       "http://127.0.0.1:8080/vedios/abc.flv",

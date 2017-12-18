@@ -20,7 +20,7 @@ type User struct {
 	UserType int    `json:id`
 }
 
-type VedioInfo struct {
+type Vedio struct {
 	ID        string `json:id`
 	UserName  string `json:userName`
 	VedioName string `json:vedioName`

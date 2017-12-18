@@ -47,7 +47,7 @@ func registerUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 }
 
 func uploadVedio(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	var vedioInfo VedioInfo
+	var vedio Vedio
 
 	fmt.Fprintf(w, "uploadVedio, vedio name %s!\n", ps.ByName("vedioName"))
 	fmt.Printf("uploadVedio, vedio name %s!\n", ps.ByName("vedioName"))
@@ -55,9 +55,9 @@ func uploadVedio(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	body_str := string(body)
 	fmt.Println(body_str)
 
-	if err := json.Unmarshal(body, &vedioInfo); err == nil {
-		fmt.Println("json.Unmarshal vedioInfo")
-		fmt.Println(vedioInfo)
+	if err := json.Unmarshal(body, &vedio); err == nil {
+		fmt.Println("json.Unmarshal vedio")
+		fmt.Println(vedio)
 	} else {
 		fmt.Println("json.Unmarshal err")
 		fmt.Println(err)
@@ -65,7 +65,7 @@ func uploadVedio(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 }
 
 func deleteVedio(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	var vedioInfo VedioInfo
+	var vedio Vedio
 
 	fmt.Fprintf(w, "deleteVedio, vedio name %s!\n", ps.ByName("vedioName"))
 	fmt.Printf("deleteVedio, vedio name %s!\n", ps.ByName("vedioName"))
@@ -73,9 +73,9 @@ func deleteVedio(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	body_str := string(body)
 	fmt.Println(body_str)
 
-	if err := json.Unmarshal(body, &vedioInfo); err == nil {
-		fmt.Println("json.Unmarshal vedioInfo")
-		fmt.Println(vedioInfo)
+	if err := json.Unmarshal(body, &vedio); err == nil {
+		fmt.Println("json.Unmarshal vedio")
+		fmt.Println(vedio)
 	} else {
 		fmt.Println("json.Unmarshal err")
 		fmt.Println(err)
@@ -83,7 +83,7 @@ func deleteVedio(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 }
 
 func purchaseVedio(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	var vedioInfo VedioInfo
+	var vedio Vedio
 
 	fmt.Fprintf(w, "purchaseVedio, vedio name %s!\n", ps.ByName("vedioName"))
 	fmt.Printf("purchaseVedio, vedio name %s!\n", ps.ByName("vedioName"))
@@ -91,9 +91,9 @@ func purchaseVedio(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 	body_str := string(body)
 	fmt.Println(body_str)
 
-	if err := json.Unmarshal(body, &vedioInfo); err == nil {
-		fmt.Println("json.Unmarshal vedioInfo")
-		fmt.Println(vedioInfo)
+	if err := json.Unmarshal(body, &vedio); err == nil {
+		fmt.Println("json.Unmarshal vedio")
+		fmt.Println(vedio)
 	} else {
 		fmt.Println("json.Unmarshal err")
 		fmt.Println(err)
@@ -101,7 +101,7 @@ func purchaseVedio(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 }
 
 func playVedio(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	var vedioInfo VedioInfo
+	var vedio Vedio
 
 	fmt.Fprintf(w, "playVedio, vedio name %s!\n", ps.ByName("vedioName"))
 	fmt.Printf("playVedio, vedio name %s!\n", ps.ByName("vedioName"))
@@ -109,9 +109,9 @@ func playVedio(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	body_str := string(body)
 	fmt.Println(body_str)
 
-	if err := json.Unmarshal(body, &vedioInfo); err == nil {
-		fmt.Println("json.Unmarshal vedioInfo")
-		fmt.Println(vedioInfo)
+	if err := json.Unmarshal(body, &vedio); err == nil {
+		fmt.Println("json.Unmarshal vedio")
+		fmt.Println(vedio)
 	} else {
 		fmt.Println("json.Unmarshal err")
 		fmt.Println(err)
