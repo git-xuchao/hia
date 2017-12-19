@@ -11,15 +11,21 @@ import (
 	"gopkg.in/urfave/cli.v1"
 
 	"hia/core/types"
-)
+	/*
+	 *"hia/core/ysdb"
+	 */)
 
 var routes = types.Routes{
 	types.Route{"Index", "GET", "/", index},
-	types.Route{"Hello", "GET", "/hello/:name", hello},
+	/*
+	 *types.Route{"Hello", "GET", "/hello/:name", hello},
+	 */
 	types.Route{"RegisterUser", "POST", "/users/:usertype", registerUser},
-	types.Route{"UploadVideo", "PUT", "/videos/:videoName", uploadVideo},
+	types.Route{"UploadVideo", "POST", "/videos/:videoName", uploadVideo},
 	types.Route{"DeleteVideo", "DELETE", "/videos/:videoName", deleteVideo},
-	types.Route{"PurchaseVideo", "POST", "/videos/:videoName", purchaseVideo},
+	/*
+	 *types.Route{"PurchaseVideo", "POST", "/videos/:videoName", purchaseVideo},
+	 */
 	types.Route{"PlayVideo", "GET", "/videos/:videoName", playVideo},
 }
 
@@ -34,6 +40,10 @@ func hello(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 func registerUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	var user types.User
 
+	base := GetGlobalBase()
+	db := base.db
+	ethcli := base.ethclient
+
 	fmt.Fprintf(w, "register, usertype %s!\n", ps.ByName("usertype"))
 	fmt.Printf("register, usertype %s!\n", ps.ByName("usertype"))
 	body, _ := ioutil.ReadAll(r.Body)
@@ -44,6 +54,17 @@ func registerUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 		fmt.Println("json.Unmarshal user")
 		fmt.Println(user)
 		fmt.Println("username:", user.UserName, ", Password:", user.Password, ", Id:", user.ID, ", UserType:", user.UserType)
+		db.UserAdd(&user)
+		account := ethcli.NewAccount(user.Password)
+		len := len(account)
+		key, _ := ethcli.GetKey(account[3 : len-1])
+		fmt.Printf("key :%s", key)
+		user.EthAccount = account
+		user.EthKey = key
+		user.EthKeyFileName, _ = ethcli.GetKeyFileName(account)
+
+		fmt.Print("user info:\n")
+		fmt.Println(user)
 	} else {
 		fmt.Println("json.Unmarshal err")
 		fmt.Println(err)
@@ -123,8 +144,10 @@ func playVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 }
 
 func NewServer(ctx *cli.Context) error {
-	router := NewHttpRouter()
 
+	router := NewHttpRouter()
+	base, _ := NewBase()
+	SetGlobalBase(base)
 	log.Fatal(http.ListenAndServe(":8080", router))
 
 	return nil

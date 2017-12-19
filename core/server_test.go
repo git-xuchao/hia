@@ -67,7 +67,7 @@ func TestHttpRegistUser(t *testing.T) {
 	fmt.Println("response Body:", string(body))
 }
 
-func TestHttpPutVideo(t *testing.T) {
+func TestHttpPostVideo(t *testing.T) {
 	url := "http://127.0.0.1:8080/videos/abc.flv"
 
 	video := &types.Video{
@@ -89,7 +89,7 @@ func TestHttpPutVideo(t *testing.T) {
 	fmt.Println("jsonStr", jsonStr)
 	fmt.Println("new_str", bytes.NewBuffer(jsonStr))
 
-	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(jsonStr))
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
 	// req.Header.Set("X-Custom-Header", "myvalue")
 	req.Header.Set("Content-Type", "application/json")
 

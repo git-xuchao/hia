@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"math/big"
 	"os"
+	"strings"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -15,10 +17,11 @@ import (
 )
 
 type EthClient struct {
-	client  *rpc.Client
-	abiFile *os.File
-	abi     abi.ABI
-	decoder *json.Decoder
+	client                *rpc.Client
+	abiFile               *os.File
+	abi                   abi.ABI
+	decoder               *json.Decoder
+	keyStoreSearchingPath string
 }
 
 func (this *EthClient) Dial(addr string) error {
@@ -114,8 +117,37 @@ func (this *EthClient) Call(result interface{}, method string, args ...interface
 	return this.client.Call(result, method, args...)
 }
 
-func (this *EthClient) Close() {
-	this.client.Close()
+func (this *EthClient) SetKeyStoreSearchingPath(path string) error {
+	this.keyStoreSearchingPath = path
+
+	return nil
+}
+
+func (this *EthClient) GetKeyFileName(account string) (string, error) {
+	files, _ := ioutil.ReadDir(this.keyStoreSearchingPath)
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		} else {
+			if strings.Contains(file.Name(), account) == true {
+				fmt.Println(file.Name())
+				return file.Name(), nil
+			}
+		}
+	}
+	return "", nil
+}
+
+func (this *EthClient) GetKey(account string) (string, error) {
+	fmt.Printf("EthClient GetKey, account:%s", account)
+	fileName, _ := this.GetKeyFileName(account)
+	fmt.Printf("Key File Name:%s", fileName)
+	if fileName != "" {
+		dat, _ := ioutil.ReadFile(this.keyStoreSearchingPath + "/" + fileName)
+		return string(dat), nil
+	} else {
+		return "", nil
+	}
 }
 
 func (this *EthClient) NewAccount(password string) string {
@@ -123,7 +155,11 @@ func (this *EthClient) NewAccount(password string) string {
 	var account string
 
 	this.Call(&result, "personal_newAccount", password)
-	account = common.ToHex(result)
+	/*
+	 *account = common.ToHex(result)
+	 *fmt.Printf("new account:%s\n", account)
+	 */
+	account = string(result)
 
 	fmt.Printf("new account:%s\n", account)
 
@@ -148,6 +184,10 @@ func (this *EthClient) ListAccounts() []string {
 	fmt.Printf("slice len=%d, cap=%d", len(accounts), cap(accounts))
 
 	return accounts
+}
+
+func (this *EthClient) Close() {
+	this.client.Close()
 }
 
 func NewEthClient() *EthClient {
