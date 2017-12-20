@@ -1,4 +1,4 @@
-package core
+package spark
 
 import (
 	"bytes"
@@ -11,7 +11,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 
-	"hia/core/types"
+	"hia/cmd/spark/types"
 )
 
 func TestHttpRouter(t *testing.T) {

@@ -1,9 +1,9 @@
-package core
+package spark
 
 import (
 	"sync"
 
-	"hia/core/ysdb"
+	"hia/cmd/spark/ysdb"
 	ethclient "hia/ethclient"
 )
 

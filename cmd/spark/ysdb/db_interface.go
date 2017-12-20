@@ -1,7 +1,7 @@
 package ysdb
 
 import (
-	"hia/core/types"
+	"hia/cmd/spark/types"
 )
 
 type YsDb interface {

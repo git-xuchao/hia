@@ -2,7 +2,7 @@ package ysdb
 
 import (
 	"fmt"
-	"hia/core/types"
+	"hia/cmd/spark/types"
 )
 
 type ABCDatabase struct {

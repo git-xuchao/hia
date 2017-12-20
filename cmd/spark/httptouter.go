@@ -1,4 +1,4 @@
-package core
+package spark
 
 import (
 	"github.com/julienschmidt/httprouter"

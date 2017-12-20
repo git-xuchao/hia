@@ -83,7 +83,7 @@ func (this *EthClient) PackMethod(name string, args ...interface{}) ([]byte, err
 	return this.abi.Pack(name, args...)
 }
 
-func (this *EthClient) SetCallMsg(msg *ethereum.CallMsg, from string, to string, data []byte) error {
+func (this *EthClient) SetCallMsg(msg *ethereum.CallMsg, from string, to string, gas string, gasPrice string, value string, data []byte) error {
 	var addr common.Address
 
 	if len(from) != 0 {
@@ -99,6 +99,21 @@ func (this *EthClient) SetCallMsg(msg *ethereum.CallMsg, from string, to string,
 		msg.To = &addr
 	}
 
+	if gas != "" {
+		msg.Gas = new(big.Int)
+		msg.Gas.SetString(gas, 0)
+	}
+
+	if gasPrice != "" {
+		msg.GasPrice = new(big.Int)
+		msg.GasPrice.SetString(gasPrice, 0)
+	}
+
+	if value != "" {
+		msg.Value = new(big.Int)
+		msg.Value.SetString(value, 0)
+	}
+
 	msg.Data = data
 
 	return nil
@@ -108,6 +123,16 @@ func (this *EthClient) CallContract(msg ethereum.CallMsg, blockNumber *big.Int) 
 	var hex hexutil.Bytes
 	err := this.client.CallContext(context.Background(), &hex, "eth_call", toCallArg(msg), toBlockNumArg(blockNumber))
 	if err != nil {
+		return nil, err
+	}
+	return hex, nil
+}
+
+func (this *EthClient) SendTransaction(msg ethereum.CallMsg, password string) ([]byte, error) {
+	var hex hexutil.Bytes
+	err := this.client.CallContext(context.Background(), &hex, "personal_sendTransaction", toCallArg(msg), password)
+	if err != nil {
+		fmt.Printf("error %v\n", err)
 		return nil, err
 	}
 	return hex, nil

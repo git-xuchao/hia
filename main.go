@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"gopkg.in/urfave/cli.v1"
-	"hia/core"
+	"hia/cmd/spark"
 	http "hia/http/httpraw"
 	"hia/lab"
 	"hia/redis"
@@ -107,7 +107,7 @@ var (
 )
 
 func init() {
-	app.Action = core.NewServer
+	app.Action = spark.NewServer
 	app.Commands = []cli.Command{
 		addCommand,
 		labCommand,

@@ -160,10 +160,29 @@ func TestCallContact2(t *testing.T) {
 	cli.ConstructAbi("./Hello_sol_Hello.abi")
 	data, _ := cli.PackMethod("getAuthorString", [32]byte{123}, false)
 	fmt.Println("data:", data)
-	cli.SetCallMsg(&msg, "", "0x192fc81ea2f59af885f2c55cf262cd77ec155335", data)
+	cli.SetCallMsg(&msg, "", "0x192fc81ea2f59af885f2c55cf262cd77ec155335", "", "", "", data)
 	fmt.Println("msg", msg)
 	result, _ := cli.CallContract(msg, nil)
 	fmt.Printf("result %v\n", result)
+}
+
+func TestSendTransaction(t *testing.T) {
+	var cli *EthClient
+	var msg ethereum.CallMsg
+
+	cli = NewEthClient()
+	cli.Dial("http" + "://" + "192.168.31.52:8545")
+	cli.ConstructAbi("./Hello_sol_Hello.abi")
+	data, _ := cli.PackMethod("getAuthorString", [32]byte{123}, false)
+	fmt.Println("data:", data)
+	cli.SetCallMsg(&msg, "0x6d83edbcc8c55c183a0695bb39ac20e7cf17f100", "0x192fc81ea2f59af885f2c55cf262cd77ec155335", "", "", "", data)
+	fmt.Println("msg", msg)
+	result, err := cli.SendTransaction(msg, "123456")
+	if err != nil {
+		fmt.Printf("err: %v\n", err)
+	} else {
+		fmt.Printf("result %v\n", result)
+	}
 }
 
 func TestClientNewAccount(t *testing.T) {

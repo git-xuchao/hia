@@ -1,4 +1,4 @@
-package core
+package spark
 
 import (
 	"encoding/json"
@@ -10,9 +10,9 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"gopkg.in/urfave/cli.v1"
 
-	"hia/core/types"
+	"hia/cmd/spark/types"
 	/*
-	 *"hia/core/ysdb"
+	 *"hia/spark/ysdb"
 	 */)
 
 var routes = types.Routes{
