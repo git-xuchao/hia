@@ -119,12 +119,53 @@ func (this *EthClient) SetCallMsg(msg *ethereum.CallMsg, from string, to string,
 	return nil
 }
 
-func (this *EthClient) CallContract(msg ethereum.CallMsg, blockNumber *big.Int) ([]byte, error) {
+func (this *EthClient) CallContract2(msg ethereum.CallMsg, blockNumber *big.Int) ([]byte, error) {
 	var hex hexutil.Bytes
 	err := this.client.CallContext(context.Background(), &hex, "eth_call", toCallArg(msg), toBlockNumArg(blockNumber))
 	if err != nil {
 		return nil, err
 	}
+	return hex, nil
+}
+
+func (this *EthClient) CallContractMethodOnly(msg ethereum.CallMsg, blockNumber *big.Int, method string, args ...interface{}) ([]byte, error) {
+	var hex hexutil.Bytes
+
+	data, _ := this.PackMethod(method, args...)
+	msg.Data = data
+
+	err := this.client.CallContext(context.Background(), &hex, "eth_call", toCallArg(msg), toBlockNumArg(blockNumber))
+	if err != nil {
+		return nil, err
+	}
+
+	/*
+	 *var reversed struct {
+	 *    Int    *big.Int
+	 *    String string
+	 *}
+	 */
+	var Err uint8
+	var String string
+
+	result := []interface{}{&Err, &String}
+
+	/*
+	 *fmt.Println("method:", method)
+	 *fmt.Println("hex", hex)
+	 *fmt.Println("reversed", reversed)
+	 */
+
+	err = this.abi.Unpack(&result, method, hex)
+	if err != nil {
+	}
+
+	/*
+	 *fmt.Println("new reserved", reversed)
+	 */
+	fmt.Println(Err)
+	fmt.Println(String)
+
 	return hex, nil
 }
 
@@ -136,6 +177,12 @@ func (this *EthClient) SendTransaction(msg ethereum.CallMsg, password string) ([
 		return nil, err
 	}
 	return hex, nil
+}
+
+func (this *EthClient) CallContractMethod(msg ethereum.CallMsg, password string, method string, args ...interface{}) ([]byte, error) {
+	data, _ := this.PackMethod(method, args...)
+	msg.Data = data
+	return this.SendTransaction(msg, password)
 }
 
 func (this *EthClient) Call(result interface{}, method string, args ...interface{}) error {

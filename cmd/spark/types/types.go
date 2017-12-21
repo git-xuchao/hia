@@ -14,26 +14,26 @@ type Route struct {
 type Routes []Route
 
 type User struct {
+	UserID          uint64 `json:"userID"`
 	UserName        string `json:"userName"`
 	Password        string `json:"password"`
-	ID              string `json:id`
-	UserType        int    `json:usertype` //enum ('common','author')
-	RegisterTime    uint64 `json:"registerTime"`
+	UserType        string `json:"userType"` //enum ('common','author')
 	UserIdCard      string `json:"userIdCard"`
 	Email           string `json:"email"`
-	EthAccount      string `json:"account"`
-	EthKey          string `json:"secretKey"`
+	EthAccount      string `json:"ethAccount"`
+	EthKey          string `json:"ethKey"`
 	EthKeyFileName  string `json:"ethKeyFileName"`
-	EthContractAddr string `json:"ethrAddr"`
-	EthAbi          string `json:"abi"`
+	EthContractAddr string `json:"ethContractAddr"`
+	EthAbi          string `json:"ethAbi"`
+	RegisterTime    uint64 `json:"registerTime"`
 	LastUpdateTime  uint64 `json:"lastUpdateTime"`
 }
 
 type Video struct {
-	ID          string `json:id`
-	UserName    string `json:userName`
-	VideoName   string `json:videoName`
-	URL         string `json:url`
+	UserID      string `json:"userID"`
+	VideoID     string `json:"videoID"`
+	VideoName   string `json:"videoName"`
+	URL         string `json:"url"`
 	UploadTime  uint64 `json:"uploadTime"`
 	Transaction string `json:"transaction"`
 	Status      bool   `json:"status"`
@@ -44,7 +44,7 @@ type Video struct {
 type VideoTransaction struct {
 	BuyTime       uint64 `json:"buyTime"`
 	TransactionId string `json:"transactionId"`
-	Url           string `json:"url"`
-	UserId        uint64 `json:"userId"`
+	URL           string `json:"url"`
+	UserID        uint64 `json:"userId"`
 	Transaction   string `json:"transaction"`
 }
