@@ -30,7 +30,7 @@ type User struct {
 }
 
 type Video struct {
-	UserID      string `json:"userID"`
+	UserID      uint64 `json:"userID"`
 	VideoID     string `json:"videoID"`
 	VideoName   string `json:"videoName"`
 	URL         string `json:"url"`

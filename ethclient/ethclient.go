@@ -3,6 +3,7 @@ package myethclient
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"math/big"
@@ -63,6 +64,15 @@ func (this *EthClient) Dial(addr string) error {
  *    return err
  *}
  */
+
+func (this *EthClient) ConstructAbi2(def string) error {
+	var err error
+
+	this.abi, err = abi.JSON(strings.NewReader(def))
+	fmt.Printf("%v\n", this.abi)
+
+	return err
+}
 
 func (this *EthClient) ConstructAbi(path string) error {
 	fp, err := os.Open(path)
@@ -130,6 +140,8 @@ func (this *EthClient) CallContract2(msg ethereum.CallMsg, blockNumber *big.Int)
 
 func (this *EthClient) CallContractMethodOnly(msg ethereum.CallMsg, blockNumber *big.Int, method string, args ...interface{}) ([]byte, error) {
 	var hex hexutil.Bytes
+	var Err uint8
+	var String string
 
 	data, _ := this.PackMethod(method, args...)
 	msg.Data = data
@@ -139,34 +151,18 @@ func (this *EthClient) CallContractMethodOnly(msg ethereum.CallMsg, blockNumber 
 		return nil, err
 	}
 
-	/*
-	 *var reversed struct {
-	 *    Int    *big.Int
-	 *    String string
-	 *}
-	 */
-	var Err uint8
-	var String string
-
 	result := []interface{}{&Err, &String}
-
-	/*
-	 *fmt.Println("method:", method)
-	 *fmt.Println("hex", hex)
-	 *fmt.Println("reversed", reversed)
-	 */
 
 	err = this.abi.Unpack(&result, method, hex)
 	if err != nil {
+		return nil, err
 	}
 
-	/*
-	 *fmt.Println("new reserved", reversed)
-	 */
-	fmt.Println(Err)
-	fmt.Println(String)
+	if Err != 0 {
+		return nil, errors.New(String)
+	}
 
-	return hex, nil
+	return nil, err
 }
 
 func (this *EthClient) SendTransaction(msg ethereum.CallMsg, password string) ([]byte, error) {
@@ -183,6 +179,15 @@ func (this *EthClient) CallContractMethod(msg ethereum.CallMsg, password string,
 	data, _ := this.PackMethod(method, args...)
 	msg.Data = data
 	return this.SendTransaction(msg, password)
+}
+
+func (this *EthClient) CallContractMethodPack(msg ethereum.CallMsg, password string, method string, args ...interface{}) ([]byte, error) {
+	_, err := this.CallContractMethodOnly(msg, nil, method, args...)
+	if err != nil {
+		return nil, err
+	} else {
+		return this.CallContractMethod(msg, password, method, args...)
+	}
 }
 
 func (this *EthClient) Call(result interface{}, method string, args ...interface{}) error {

@@ -23,6 +23,12 @@ func (this *ABCDatabase) UserQuery(user *types.User) (*[]types.User, error) {
 	return nil, nil
 }
 
+func (this *ABCDatabase) UserQuerySimple(video *types.User) (types.User, error) {
+	fmt.Println("VideoQuerySimple")
+	var newUser types.User
+	return newUser, nil
+}
+
 func (this *ABCDatabase) UserDelete(user *types.User) error {
 	fmt.Println("UserDelete")
 	return nil

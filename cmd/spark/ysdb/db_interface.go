@@ -8,6 +8,7 @@ type YsDb interface {
 	UserAdd(user *types.User) error
 	UserUpdate(user *types.User) error
 	UserQuery(user *types.User) (*[]types.User, error)
+	UserQuerySimple(user *types.User) (types.User, error)
 	UserDelete(user *types.User) error
 
 	VideoAdd(video *types.Video) error

@@ -23,9 +23,6 @@ import (
 	 */
 	"context"
 	"encoding/json"
-	/*
-	 *"fmt"
-	 */
 	"os"
 	"testing"
 
@@ -68,14 +65,13 @@ type Result struct {
 	String string
 }
 
-func TestClientHTTP(t *testing.T) {
+func TestNodeInfo(t *testing.T) {
+	var result p2p.NodeInfo
+
+	fmt.Println("TestNodeInfo")
 	client, _ := rpc.Dial("http://127.0.0.1:8001")
 	defer client.Close()
 
-	/*
-	 *var resp interface{}
-	 */
-	var result p2p.NodeInfo
 	if err := client.Call(&result, "admin_nodeInfo"); err != nil {
 		t.Fatal(err)
 	}
@@ -121,6 +117,7 @@ func TestCallContact(t *testing.T) {
 	var addr common.Address
 	var v abi.ABI
 
+	fmt.Println("TestCallContact")
 	fp, _ := os.Open("./Hello_sol_Hello.abi")
 	dec := json.NewDecoder(fp)
 
@@ -170,6 +167,7 @@ func TestSendTransaction(t *testing.T) {
 	var cli *EthClient
 	var msg ethereum.CallMsg
 
+	fmt.Println("TestSendTransaction")
 	cli = NewEthClient()
 	cli.Dial("http" + "://" + "192.168.31.52:8545")
 	cli.ConstructAbi("./Hello_sol_Hello.abi")
@@ -189,6 +187,7 @@ func TestCallContactMethod(t *testing.T) {
 	var cli *EthClient
 	var msg ethereum.CallMsg
 
+	fmt.Println("TestCallContactMethod")
 	cli = NewEthClient()
 	cli.Dial("http" + "://" + "192.168.31.52:8545")
 	cli.ConstructAbi("./Hello_sol_Hello.abi")
@@ -207,6 +206,7 @@ func TestCallContactMethod2(t *testing.T) {
 	var cli *EthClient
 	var msg ethereum.CallMsg
 
+	fmt.Println("TestCallContactMethod2")
 	cli = NewEthClient()
 	cli.Dial("http" + "://" + "192.168.31.52:8545")
 	cli.ConstructAbi("./copyright_sol_copyright.abi")
@@ -221,7 +221,7 @@ func TestCallContactMethod2(t *testing.T) {
 	}
 }
 
-func TestTryContactMethod(t *testing.T) {
+func TestCallContractMethodOnly(t *testing.T) {
 	var cli *EthClient
 	var msg ethereum.CallMsg
 
@@ -236,17 +236,43 @@ func TestTryContactMethod(t *testing.T) {
 	fmt.Printf("result %v\n", result)
 }
 
-func TestTryContactMethod2(t *testing.T) {
+func TestCallContractMethodOnly2(t *testing.T) {
 	var cli *EthClient
 	var msg ethereum.CallMsg
 
+	fmt.Println("CallContractMethodOnly2")
 	cli = NewEthClient()
 	cli.Dial("http" + "://" + "192.168.31.52:8545")
 	cli.ConstructAbi("./copyright_sol_copyright.abi")
 
 	cli.SetCallMsg(&msg, "0x6e2d604754ae054e2558b38a265cb84fccb975f6", "0xa231475d813a4e642c0f98fe3167211e2e9d133d", "", "", "", nil)
 
-	result, err := cli.CallContractMethodOnly(msg, nil, "playVideo", "xuchao", "dsfasdfdsf")
+	result, err := cli.CallContractMethodOnly(msg, nil, "playVideo", "xuchao", "dsfadsf")
+	if err != nil {
+		fmt.Printf("err: %v\n", err)
+	} else {
+		fmt.Printf("result %v\n", result)
+	}
+}
+
+func TestCallContractMethodPack(t *testing.T) {
+	var cli *EthClient
+	var msg ethereum.CallMsg
+
+	fmt.Println("TestCallContractMethodPack")
+	cli = NewEthClient()
+	cli.Dial("http" + "://" + "192.168.31.52:8545")
+	cli.ConstructAbi("./copyright_sol_copyright.abi")
+
+	cli.SetCallMsg(&msg, "0x6e2d604754ae054e2558b38a265cb84fccb975f6", "0xa231475d813a4e642c0f98fe3167211e2e9d133d", "", "", "", nil)
+
+	result, err := cli.CallContractMethodOnly(msg, nil, "playVideo", "alan", "abc.flv")
+	/*
+	 *result, err := cli.CallContractMethodPack(msg, "123456", "purchaseVideo", "alan", "abc.flv")
+	 */
+	/*
+	 *result, err := cli.CallContractMethodPack(msg, "123456", "uploadVideo", "abc.flv")
+	 */
 	if err != nil {
 		fmt.Printf("err: %v\n", err)
 	} else {

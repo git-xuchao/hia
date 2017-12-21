@@ -20,7 +20,7 @@ var (
 func NewBase() (*Base, error) {
 	var client *ethclient.EthClient
 	var db ysdb.YsDb
-	var ethclientAddr string = "http://127.0.0.1:8001"
+	var ethclientAddr string = "http://192.168.31.52:8545"
 
 	client = ethclient.NewEthClient()
 	client.Dial(ethclientAddr)
