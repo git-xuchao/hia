@@ -266,10 +266,10 @@ func TestCallContractMethodPack(t *testing.T) {
 
 	cli.SetCallMsg(&msg, "0x6e2d604754ae054e2558b38a265cb84fccb975f6", "0xa231475d813a4e642c0f98fe3167211e2e9d133d", "", "", "", nil)
 
-	result, err := cli.CallContractMethodOnly(msg, nil, "playVideo", "alan", "abc.flv")
 	/*
-	 *result, err := cli.CallContractMethodPack(msg, "123456", "purchaseVideo", "alan", "abc.flv")
+	 *result, err := cli.CallContractMethodOnly(msg, nil, "playVideo", "alan", "abc.flv")
 	 */
+	result, err := cli.CallContractMethodPack(msg, "123456", "purchaseVideo", "alan", "abc.flv")
 	/*
 	 *result, err := cli.CallContractMethodPack(msg, "123456", "uploadVideo", "abc.flv")
 	 */

@@ -37,13 +37,14 @@ func (d *DbMysql) createAllTables() error {
 	createVideoTable := `
         create table if not exists video (
             upload_time timestamp not null default current_timestamp,
-            url varchar(256) primary key,
-            video_name varchar(128),
+            video_id varchar(256) primary key,
+            video_name varchar(256),
+            url varchar(256) not null,
             user_id bigint not null,
             transaction varchar(64) not null,
             status boolean default true,
-            plays int not null,
-            buys int not null,
+            plays int not null default 0,
+            buys int not null default 0,
             constraint user_id foreign key(user_id) references user(user_id)
         );
     `
@@ -51,10 +52,10 @@ func (d *DbMysql) createAllTables() error {
         create table if not exists video_transaction (
             buy_time timestamp not null default current_timestamp,
             transaction_id varchar(100) not null,
-            url varchar(100) not null,
+            video_id varchar(256) not null,
             user_id bigint not null,
             transaction varchar(100) not null,
-            constraint url foreign key(url) references video(url),
+            constraint  video_id foreign key(video_id) references video(video_id),
             constraint buy_uid foreign key(user_id) references user(user_id)
         );
     `
@@ -82,7 +83,7 @@ func (d *DbMysql) UserAdd(user *types.User) error {
 		return nil
 	}
 
-	format := " , %s = '%v'"
+	format := " , %s = '%v' "
 	s := fmt.Sprintf("insert user set user_id = %d, password = '%s', user_type = '%s'",
 		user.UserID, user.Password, user.UserType)
 
@@ -329,8 +330,12 @@ func (d *DbMysql) VideoAdd(video *types.Video) error {
 	}
 
 	format := ", %s = \"%v\" "
-	s := fmt.Sprintf("insert video set url = \"%s\", user_id = %d, transaction = \"%s\", status = %v, plays = %d, buys = %d",
-		video.URL, video.UserID, video.Transaction, video.Status, video.Plays, video.Buys)
+	s := fmt.Sprintf("insert video set video_id = \"%s\", url = \"%s\", user_id = %d, transaction = \"%s\"",
+		video.VideoID, video.URL, video.UserID, video.Transaction)
+
+	if nil != video.Status {
+		s += fmt.Sprintf(", %s = %v ", video.Status)
+	}
 
 	if "" != video.VideoName {
 		s += fmt.Sprintf(format, "video_name", video.VideoName)
@@ -348,6 +353,7 @@ func (d *DbMysql) VideoUpdate(video *types.Video) error {
 	}
 
 	format := " %s %s = \"%v\" "
+	format2 := " %s %s = %v "
 	delimiter := " "
 
 	s := fmt.Sprintf("update video set ")
@@ -357,8 +363,13 @@ func (d *DbMysql) VideoUpdate(video *types.Video) error {
 		delimiter = ","
 	}
 
+	if "" != video.URL {
+		s += fmt.Sprintf(format, delimiter, "url", video.URL)
+		delimiter = ","
+	}
+
 	if 0 != video.UserID {
-		s += fmt.Sprintf(" %s %s = %v ", delimiter, "user_id", video.UserID)
+		s += fmt.Sprintf(format2, delimiter, "user_id", video.UserID)
 		delimiter = ","
 	}
 
@@ -368,20 +379,20 @@ func (d *DbMysql) VideoUpdate(video *types.Video) error {
 	}
 
 	if nil != video.Status {
-		s += fmt.Sprintf(" %s %s = %v ", delimiter, "status", video.Status)
+		s += fmt.Sprintf(format2, delimiter, "status", video.Status)
 		delimiter = ","
 	}
 
 	if nil != video.Plays {
-		s += fmt.Sprintf(" %s %s = %v ", delimiter, "plays", video.Plays)
+		s += fmt.Sprintf(format2, delimiter, "plays", video.Plays)
 		delimiter = ","
 	}
 	if nil != video.Buys {
-		s += fmt.Sprintf(" %s %s = %v ", delimiter, "buys", video.Buys)
+		s += fmt.Sprintf(format2, delimiter, "buys", video.Buys)
 		delimiter = ","
 	}
 
-	s += fmt.Sprintf(" where url = \"%s\";", video.URL)
+	s += fmt.Sprintf(" where video_id = \"%s\";", video.VideoID)
 
 	if " " == delimiter {
 		return nil
@@ -400,7 +411,7 @@ func (d *DbMysql) VideoQuery(video *types.Video, sqls string) (*[]types.Video, e
 	format2 := " and %s = %v "
 	s := `
         select 
-            upload_time, url, video_name, user_id, transaction, status, plays, buys 
+            upload_time, url, video_id, video_name, user_id, transaction, status, plays, buys 
         from
             video 
         where 
@@ -411,9 +422,13 @@ func (d *DbMysql) VideoQuery(video *types.Video, sqls string) (*[]types.Video, e
 		s += fmt.Sprintf(format, "url", video.URL)
 	}
 
-	if 0 != video.UploadTime {
-		s += fmt.Sprintf(format2, "upload_time", video.UploadTime)
+	if "" != video.VideoID {
+		s += fmt.Sprintf(format, "video_id", video.VideoID)
 	}
+
+	// if 0 != video.UploadTime {
+	// 	s += fmt.Sprintf(format2, "upload_time", video.UploadTime)
+	// }
 
 	if "" != video.VideoName {
 		s += fmt.Sprintf(format, "video_name", video.VideoName)
@@ -449,11 +464,24 @@ func (d *DbMysql) VideoQuery(video *types.Video, sqls string) (*[]types.Video, e
 	res := make([]types.Video, 0, 10)
 	for rows.Next() {
 		var temp types.Video
-		err = rows.Scan(&temp.UploadTime, &temp.URL, &temp.VideoName, &temp.UserID,
-			&temp.Transaction, &temp.Status, &temp.Plays, &temp.Buys)
+		var uploadTime mysql.NullTime
+		var videoName sql.NullString
+
+		temp.Status = new(bool)
+		temp.Plays = new(uint)
+		temp.Buys = new(uint)
+
+		err = rows.Scan(&uploadTime, &temp.URL, &temp.VideoID, &videoName, &temp.UserID,
+			&temp.Transaction, temp.Status, temp.Plays, temp.Buys)
 
 		if err != nil {
 			return nil, err
+		}
+		fmt.Println(*temp.Status, *temp.Plays, *temp.Buys)
+		temp.UploadTime = uploadTime.Time
+
+		if videoName.Valid {
+			temp.VideoName = videoName.String
 		}
 
 		res = append(res, temp)
@@ -474,7 +502,12 @@ func (d *DbMysql) VideoQuerySimple(video *types.Video) (types.Video, error) {
 	fmt.Println("VideoQuerySimple")
 	searchVideo, err := d.VideoQuery(video, "")
 
-	return (*searchVideo)[0], err
+	if searchVideo != nil {
+		return (*searchVideo)[0], err
+	} else {
+		return *video, err
+	}
+
 }
 
 func (d *DbMysql) VideoDelete(video *types.Video) error {
@@ -482,7 +515,7 @@ func (d *DbMysql) VideoDelete(video *types.Video) error {
 		return nil
 	}
 
-	s := fmt.Sprintf("delete from video where url = \"%s\";", video.URL)
+	s := fmt.Sprintf("delete from video where video_id = \"%s\";", video.VideoID)
 
 	_, err := d.db.Exec(s)
 
@@ -495,8 +528,8 @@ func (d *DbMysql) VideoTransactionAdd(vt *types.VideoTransaction) error {
 		return nil
 	}
 
-	s := fmt.Sprintf("insert video_transaction set transaction_id = \"%s\", url = \"%s\", transaction = \"%s\", user_id= %d ;",
-		vt.TransactionId, vt.URL, vt.Transaction, vt.UserID)
+	s := fmt.Sprintf("insert video_transaction set transaction_id = \"%s\", video_id = \"%s\", transaction = \"%s\", user_id= %d ;",
+		vt.TransactionId, vt.VideoID, vt.Transaction, vt.UserID)
 
 	_, err := d.db.Exec(s)
 
@@ -512,7 +545,7 @@ func (d *DbMysql) VideoTransactionQuery(vt *types.VideoTransaction, sqls string)
         select 
             buy_time, 
             transaction_id, 
-            url, 
+            video_id, 
             user_id, 
             transaction 
         from 
@@ -523,8 +556,8 @@ func (d *DbMysql) VideoTransactionQuery(vt *types.VideoTransaction, sqls string)
 	format := " and %s = \"%v\" "
 	format2 := " and %s = %v "
 
-	if "" != vt.URL {
-		s += fmt.Sprintf(format, "url", vt.URL)
+	if "" != vt.VideoID {
+		s += fmt.Sprintf(format, "video_id", vt.VideoID)
 	}
 
 	if 0 != vt.BuyTime {
@@ -555,7 +588,7 @@ func (d *DbMysql) VideoTransactionQuery(vt *types.VideoTransaction, sqls string)
 	if rows.Next() {
 		var temp types.VideoTransaction
 
-		err = rows.Scan(&temp.BuyTime, &temp.TransactionId, &temp.URL, &temp.UserID, &temp.Transaction)
+		err = rows.Scan(&temp.BuyTime, &temp.TransactionId, &temp.VideoID, &temp.UserID, &temp.Transaction)
 
 		if err != nil {
 			return nil, nil

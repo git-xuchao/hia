@@ -31,7 +31,7 @@ func TestHttpRegistUser(t *testing.T) {
 	url := "http://127.0.0.1:8080/users/custom"
 
 	user := &types.User{
-		UserName: "user1",
+		UserName: "tim",
 		Password: "123456",
 		UserID:   1581341302,
 		UserType: "common",
@@ -190,10 +190,10 @@ func TestHttpPurchaceVideo(t *testing.T) {
 }
 
 func TestHttpPlayVideo(t *testing.T) {
-	url := "http://127.0.0.1:8080/videos/adsfasdfasdfa?userID=15834214&url=abc.flv"
+	url := "http://127.0.0.1:8080/videos/adsfasdfasdfa?userID=987654326&url=http://127.0.0.1:8080/videos/abc.flv"
 
 	video := &types.Video{
-		UserID: 1581341302,
+		UserID: 987654326,
 		/*
 		 *UserName:  "alan",
 		 */
@@ -231,7 +231,7 @@ func TestHttpPlayVideo(t *testing.T) {
 }
 
 func TestHttpSearch(t *testing.T) {
-	url := "http://127.0.0.1:8080/users/uploadRecord?userID=1&indexValue=abc.flv"
+	url := "http://127.0.0.1:8080//record/users?userID=987654326"
 
 	req, err := http.NewRequest("GET", url, bytes.NewBuffer([]byte("")))
 	// req.Header.Set("X-Custom-Header", "myvalue")

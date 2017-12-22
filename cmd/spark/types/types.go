@@ -36,17 +36,17 @@ type Video struct {
 	VideoID     string    `json:"videoID"`
 	VideoName   string    `json:"videoName"`
 	URL         string    `json:"url"`
+        UploadTime  time.Time `json:"uploadTime"`
 	Transaction string    `json:"transaction"`
 	Status      *bool     `json:"status"`
 	Plays       *uint     `json:"plays"`
-	Buys        *uint     `json:"buys"`
-	UploadTime  time.Time `json:"uploadTime"`
+	Buys        *uint     `json:"buys"`	
 }
 
 type VideoTransaction struct {
 	BuyTime       uint64 `json:"buyTime"`
 	TransactionId string `json:"transactionId"`
-	URL           string `json:"url"`
+	VideoID       string `json:"videoID"`
 	UserID        uint64 `json:"userId"`
 	Transaction   string `json:"transaction"`
 }
