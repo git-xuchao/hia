@@ -25,7 +25,10 @@ func NewBase() (*Base, error) {
 	client = ethclient.NewEthClient()
 	client.Dial(ethclientAddr)
 	client.SetKeyStoreSearchingPath("/home/alan/tmp/data/node1/keystore")
-	db, _ = ysdb.NewABCDatabase()
+	/*
+	 *db, _ = ysdb.NewABCDatabase()
+	 */
+	db = ysdb.NewDbMysql()
 
 	return &Base{
 		ethclient: client,

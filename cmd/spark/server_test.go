@@ -70,7 +70,7 @@ func TestHttpUploadVideo(t *testing.T) {
 	url := "http://127.0.0.1:8080/videos/abc.flv"
 
 	video := &types.Video{
-		UserID: 1581341302,
+		UserID: 987654325,
 		/*
 		 *UserName:  "alan",
 		 */
@@ -149,10 +149,10 @@ func TestHttpDeleteVideo(t *testing.T) {
 }
 
 func TestHttpPurchaceVideo(t *testing.T) {
-	url := "http://127.0.0.1:8080/videos/abc.flv"
+	url := "http://127.0.0.1:8080/transaction/abc.flv"
 
 	video := &types.Video{
-		UserID: 1581341302,
+		UserID: 987654326,
 		/*
 		 *UserName:  "alan",
 		 */

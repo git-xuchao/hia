@@ -6,7 +6,9 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strconv"
+	/*
+	 *"strconv"
+	 */
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/julienschmidt/httprouter"
@@ -70,7 +72,7 @@ func registerUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 
 func uploadVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	var video types.Video
-	var user, newUser types.User
+	var user, resUser types.User
 
 	base := GetGlobalBase()
 	db := base.db
@@ -78,6 +80,8 @@ func uploadVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	fmt.Fprintf(w, "uploadVideo, video name %s!\n", ps.ByName("videoID"))
 	fmt.Printf("uploadVideo, video name %s!\n", ps.ByName("videoID"))
+
+	videoID := ps.ByName("videoID")
 	body, _ := ioutil.ReadAll(r.Body)
 	body_str := string(body)
 	fmt.Println(body_str)
@@ -85,20 +89,28 @@ func uploadVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	if err := json.Unmarshal(body, &video); err == nil {
 		var msg ethereum.CallMsg
 
-		/* search user info*/
-		user.UserID = video.UserID
-		newUser, err = db.UserQuerySimple(&user)
-
 		fmt.Println("VideoName:", video.VideoName, ", url:", video.URL, ", UserID:", video.UserID)
 
-		ethcli.ConstructAbi("./copyright_sol_copyright.abi")
+		/* search user info*/
+		user.UserID = video.UserID
+
+		resUser, err = db.UserQuerySimple(&user)
+
+		fmt.Println(resUser)
+
+		/*
+		 *ethcli.ConstructAbi("./copyright_sol_copyright.abi")
+		 */
 		/*
 		 *dat, _ := ioutil.ReadFile("./copyright_sol_copyright.abi")
 		 *ethcli.ConstructAbi2(string(dat))
 		 */
-		ethcli.SetCallMsg(&msg, "0x6e2d604754ae054e2558b38a265cb84fccb975f6", "0xa231475d813a4e642c0f98fe3167211e2e9d133d", "", "", "", nil)
 
-		result, err := ethcli.CallContractMethodPack(msg, newUser.Password, "uploadVideo", video.URL)
+		ethcli.ConstructAbi2(resUser.EthAbi)
+
+		ethcli.SetCallMsg(&msg, resUser.EthAccount, resUser.EthContractAddr, "", "", "", nil)
+
+		result, err := ethcli.CallContractMethodPack(msg, resUser.Password, "uploadVideo", video.URL)
 		if err != nil {
 			fmt.Printf("err: %v\n", err)
 		} else {
@@ -106,6 +118,7 @@ func uploadVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		}
 
 		video.Transaction = string(result)
+		video.VideoID = videoID
 
 		db.VideoAdd(&video)
 
@@ -117,7 +130,7 @@ func uploadVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 func deleteVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	var video types.Video
-	var user, newUser types.User
+	var user, resUser types.User
 
 	base := GetGlobalBase()
 	db := base.db
@@ -132,15 +145,21 @@ func deleteVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	if err := json.Unmarshal(body, &video); err == nil {
 		var msg ethereum.CallMsg
 
-		/* search user info*/
-		user.UserID = video.UserID
-		newUser, err = db.UserQuerySimple(&user)
 		fmt.Println("VideoName:", video.VideoName, ", url:", video.URL, ", UserID:", video.UserID)
 
-		ethcli.ConstructAbi("./copyright_sol_copyright.abi")
-		ethcli.SetCallMsg(&msg, "0x6e2d604754ae054e2558b38a265cb84fccb975f6", "0xa231475d813a4e642c0f98fe3167211e2e9d133d", "", "", "", nil)
+		/* search user info*/
+		user.UserID = video.UserID
+		resUser, err = db.UserQuerySimple(&user)
+		if err != nil {
+			return
+		} else {
+			fmt.Println(resUser)
+		}
 
-		result, err := ethcli.CallContractMethodPack(msg, newUser.Password, "deleteVideo", video.UserID, video.URL)
+		ethcli.ConstructAbi2(resUser.EthAbi)
+		ethcli.SetCallMsg(&msg, resUser.EthAccount, resUser.EthContractAddr, "", "", "", nil)
+
+		result, err := ethcli.CallContractMethodPack(msg, resUser.Password, "deleteVideo", video.UserID, video.URL)
 		if err != nil {
 			fmt.Printf("err: %v\n", err)
 		} else {
@@ -156,15 +175,16 @@ func deleteVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 }
 
 func purchaseVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	var video types.Video
-	var user, newUser types.User
+	var video, queryVideo, resVideo types.Video
+	var user, resUser types.User
 
 	base := GetGlobalBase()
 	db := base.db
 	ethcli := base.ethclient
 
 	fmt.Fprintf(w, "purchaseVideo, video name %s!\n", ps.ByName("videoName"))
-	fmt.Printf("purchaseVideo, video name %s!\n", ps.ByName("videoName"))
+	fmt.Printf("purchaseVideo, video name %s!\n", ps.ByName("videoID"))
+	videoID := ps.ByName("videoID")
 	body, _ := ioutil.ReadAll(r.Body)
 	body_str := string(body)
 	fmt.Println(body_str)
@@ -172,23 +192,43 @@ func purchaseVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 	if err := json.Unmarshal(body, &video); err == nil {
 		var msg ethereum.CallMsg
 
-		/* search user info*/
-		user.UserID = video.UserID
-		newUser, err = db.UserQuerySimple(&user)
-
 		fmt.Println("VideoName:", video.VideoName, ", url:", video.URL, ", UserID:", video.UserID)
+		/* search video info*/
+		queryVideo.VideoID = videoID
+		resVideo, err = db.VideoQuerySimple(&video)
+		if err != nil {
+			return
+		} else {
+			fmt.Println(resVideo)
+		}
 
-		ethcli.ConstructAbi("./copyright_sol_copyright.abi")
-		ethcli.SetCallMsg(&msg, "0x6e2d604754ae054e2558b38a265cb84fccb975f6", "0xa231475d813a4e642c0f98fe3167211e2e9d133d", "", "", "", nil)
+		/* search author user info*/
+		user.UserID = resVideo.UserID
+		resUser, err = db.UserQuerySimple(&user)
+		if err != nil {
+			return
+		} else {
+			fmt.Println(resUser)
+		}
 
-		result, err := ethcli.CallContractMethodPack(msg, newUser.Password, "purchaseVideo", video.UserID, video.URL)
+		ethcli.ConstructAbi2(resUser.EthAbi)
+		ethcli.SetCallMsg(&msg, resUser.EthAccount, resUser.EthContractAddr, "", "", "", nil)
+
+		result, err := ethcli.CallContractMethodPack(msg, resUser.Password, "purchaseVideo", video.UserID, video.URL)
 		if err != nil {
 			fmt.Printf("err: %v\n", err)
 		} else {
 			fmt.Printf("result %v\n", result)
 		}
 
-		db.VideoAdd(&video)
+		/* add transaction info into db*/
+		var transaction types.VideoTransaction
+		transaction.UserID = video.UserID
+		transaction.URL = video.URL
+		transaction.Transaction = string(result)
+
+		db.VideoTransactionAdd(&transaction)
+
 	} else {
 		fmt.Println("json.Unmarshal err")
 		fmt.Println(err)
@@ -197,38 +237,43 @@ func purchaseVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 
 func playVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	var msg ethereum.CallMsg
-	var user, newUser types.User
+	var queryVideo, resVideo types.Video
+	var user, resUser types.User
 	var err error
 
 	base := GetGlobalBase()
 	db := base.db
 	ethcli := base.ethclient
 
+	/*parse params */
 	r.ParseForm()
 	userID := r.Form["userID"][0]
 	url := r.Form["url"][0]
 	videoID := ps.ByName("videoID")
 	fmt.Println("userID", userID, "url", url, "videoID", videoID)
 
-	/* search user info*/
-	user.UserID, _ = strconv.ParseUint(userID, 10, 64)
-	newUser, err = db.UserQuerySimple(&user)
+	/*search video info*/
+	queryVideo.VideoID = videoID
+	resVideo, err = db.VideoQuerySimple(&queryVideo)
+	if err != nil {
+		return
+	} else {
+		fmt.Println(resVideo)
+	}
 
-	ethcli.ConstructAbi("./copyright_sol_copyright.abi")
+	/*search author user info*/
+	user.UserID = resVideo.UserID
+	resUser, err = db.UserQuerySimple(&user)
+	if err != nil {
+		return
+	} else {
+		fmt.Println(resUser)
+	}
 
-	/*
-	 *dat, _ := ioutil.ReadFile("./copyright_sol_copyright.abi")
-	 *ethcli.ConstructAbi2(string(dat))
-	 */
-	ethcli.SetCallMsg(&msg, "0x6e2d604754ae054e2558b38a265cb84fccb975f6", "0xa231475d813a4e642c0f98fe3167211e2e9d133d", "", "", "", nil)
-
-	fmt.Println("ConstructAbi")
-	/*
-	 *result, err := ethcli.CallContractMethodOnly(msg, nil, "playVideo", newUser.UserID, url)
-	 */
-	fmt.Println(newUser.UserID)
-
-	result, err := ethcli.CallContractMethodOnly(msg, nil, "playVideo", "alan", "abc.flv")
+	/*call contract method*/
+	ethcli.ConstructAbi2(resUser.EthAbi)
+	ethcli.SetCallMsg(&msg, resUser.EthAccount, resUser.EthContractAddr, "", "", "", nil)
+	result, err := ethcli.CallContractMethodOnly(msg, nil, "playVideo", userID, url)
 	if err != nil {
 		fmt.Printf("err: %v\n", err)
 	} else {

@@ -18,13 +18,13 @@ func (this *ABCDatabase) UserUpdate(user *types.User) error {
 	return nil
 }
 
-func (this *ABCDatabase) UserQuery(user *types.User) (*[]types.User, error) {
+func (this *ABCDatabase) UserQuery(user *types.User, sqls string) (*[]types.User, error) {
 	fmt.Println("UserQuery")
 	return nil, nil
 }
 
 func (this *ABCDatabase) UserQuerySimple(video *types.User) (types.User, error) {
-	fmt.Println("VideoQuerySimple")
+	fmt.Println("UserQuerySimple")
 	var newUser types.User
 	return newUser, nil
 }
@@ -44,9 +44,15 @@ func (this *ABCDatabase) VideoUpdate(video *types.Video) error {
 	return nil
 }
 
-func (this *ABCDatabase) VideoQuery(video *types.Video) (*[]types.Video, error) {
+func (this *ABCDatabase) VideoQuery(video *types.Video, sqls string) (*[]types.Video, error) {
 	fmt.Println("VideoQuery")
 	return nil, nil
+}
+
+func (this *ABCDatabase) VideoQuerySimple(video *types.Video) (types.Video, error) {
+	fmt.Println("VideoQuerySimple")
+	var newVideo types.Video
+	return newVideo, nil
 }
 
 func (this *ABCDatabase) VideoDelete(video *types.Video) error {
@@ -59,7 +65,7 @@ func (this *ABCDatabase) VideoTransactionAdd(vt *types.VideoTransaction) error {
 	return nil
 }
 
-func (this *ABCDatabase) VideoTransactionQuery(vt *types.VideoTransaction) (*[]types.VideoTransaction, error) {
+func (this *ABCDatabase) VideoTransactionQuery(vt *types.VideoTransaction, sqls string) (*[]types.VideoTransaction, error) {
 	fmt.Println("VideoTransactionQuery")
 	return nil, nil
 }
