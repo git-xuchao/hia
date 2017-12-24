@@ -1,8 +1,10 @@
 package spark
 
 import (
+	"fmt"
 	"sync"
 
+	"gopkg.in/urfave/cli.v1"
 	"hia/cmd/spark/ysdb"
 	ethclient "hia/ethclient"
 )
@@ -42,4 +44,15 @@ func GetGlobalBase() *Base {
 
 func SetGlobalBase(b *Base) {
 	GlobalBase = b
+}
+
+func NewSpark(ctx *cli.Context) error {
+	fmt.Println(ctx.GlobalString("network1"))
+	fmt.Println(ctx.String("network2"))
+	fmt.Println(ctx.String("network3"))
+	NewServer(ctx)
+	base, _ := NewBase()
+	SetGlobalBase(base)
+
+	return nil
 }

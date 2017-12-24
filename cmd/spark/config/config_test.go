@@ -9,11 +9,20 @@ import (
 
 func TestConfig(t *testing.T) {
 	fmt.Println("TestConfig")
-	cfg, err := goconfig.LoadConfigFile("./conf.ini")
+	var err error
+	var cfg *goconfig.ConfigFile
+	cfg, err = goconfig.LoadConfigFile("./conf.ini")
 	if err != nil {
-		fmt.Println("LoadConfigFile err")
-		return
+		fmt.Println("LoadConfigFile err", err)
+		cfg, err = goconfig.LoadFromData([]byte(""))
+		if err != nil {
+			fmt.Println("LoadFromData err", err)
+		}
 	}
-	v, err := cfg.GetValue("DataBase", "ip")
-	fmt.Printf("%s\n", v)
+
+	cfg.SetValue("Demo", "key4", "hello girl!")
+	goconfig.SaveConfigFile(cfg, "./conf.ini")
+	/*
+	 *v, err := cfg.GetValue("DataBase", "ip")
+	 */
 }

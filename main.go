@@ -84,42 +84,45 @@ var (
 		},
 	}
 
-	testCommand = cli.Command{
-		Name:    "test",
-		Aliases: []string{"t"},
+	sparkCommand = cli.Command{
+		Name:    "spark",
+		Aliases: []string{"s"},
 		Usage:   "options for task templates",
-		Subcommands: []cli.Command{
-			{
-				Name:   "net",
-				Usage:  "test net",
-				Action: testNetCommand,
+		Action:  spark.NewSpark,
+		Flags: []cli.Flag{
+			cli.StringFlag{
+				Name:  "network2",
+				Usage: "name of the network to administer",
+				Value: "hello world",
 			},
-			{
-				Name:   "redis",
-				Usage:  "test redis",
-				Action: testRedisCommand,
-			},
-			{
-				Name:   "httpc",
-				Usage:  "test httpc",
-				Action: testHttpcCommand,
-			},
-			{
-				Name:   "httpd",
-				Usage:  "test httpd",
-				Action: testHttpdCommand,
+			cli.BoolFlag{
+				Name:  "rc",
+				Usage: "Enable the HTTP-RPC server",
 			},
 		},
 	}
 )
 
 func init() {
-	app.Action = spark.NewServer
+	app.Action = spark.NewSpark
 	app.Commands = []cli.Command{
 		addCommand,
 		labCommand,
-		testCommand,
+		sparkCommand,
 	}
+
+	app.Flags = []cli.Flag{
+		cli.StringFlag{
+			Name:  "network1",
+			Usage: "name of the network to administer",
+			Value: "hello world",
+		},
+		cli.BoolFlag{
+			Name:  "rpc",
+			Usage: "Enable the HTTP-RPC server",
+		},
+	}
+
 }
 
 func main() {

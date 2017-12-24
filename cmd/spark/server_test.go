@@ -307,7 +307,9 @@ func TestHttpSearchTransactions(t *testing.T) {
 	// req.Header.Set("X-Custom-Header", "myvalue")
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Add("Start-Time", "2016-07-27 8:46:15")
-	req.Header.Add("End-Time", "2016-07-28 8:46:15")
+	/*
+	 *req.Header.Add("End-Time", "2016-07-28 8:46:15")
+	 */
 
 	client := &http.Client{}
 	resp, err := client.Do(req)

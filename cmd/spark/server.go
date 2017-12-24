@@ -14,6 +14,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/julienschmidt/httprouter"
@@ -324,6 +325,9 @@ func playVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 func searchUsers(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	var user, resUser types.User
+	var userID uint64
+	var err error
+	var timeStart, timeEnd time.Time
 
 	/*
 	 *base := GetGlobalBase()
@@ -333,24 +337,44 @@ func searchUsers(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	 *ethcli := base.ethclient
 	 */
 
-	/*
-	 *fmt.Printf("search, indexType %s!\n", ps.ByName("indexType"))
-	 */
 	r.ParseForm()
-	fmt.Println("userID", r.Form["userID"][0])
+
 	userIDStr := r.Form["userID"][0]
-	userID, _ := strconv.ParseUint(userIDStr, 10, 64)
 	timeStartStr := r.Header.Get("Start-Time")
 	timeEndStr := r.Header.Get("End-Time")
-	fmt.Println("userID", userID, "timeStart", timeStartStr, "timeEnd", timeEndStr)
+
+	if userIDStr != "" {
+		userID, err = strconv.ParseUint(userIDStr, 10, 64)
+		if err != nil {
+			return
+		}
+	}
+
+	if timeStartStr != "" {
+		timeStart, err = time.Parse("2006-01-02 15:04:05", timeStartStr)
+		if err != nil {
+			return
+		}
+		fmt.Println(timeStart)
+	}
+
+	if timeEndStr != "" {
+		timeEnd, err = time.Parse("2006-01-02 15:04:05", timeEndStr)
+		if err != nil {
+			return
+		}
+		fmt.Println(timeEnd)
+	}
+
+	fmt.Println("userID", userID, "timeStart", timeStart, "timeEnd", timeEnd)
 
 	/* search user info*/
 	user.UserID = userID
 
 	/*
 	 *resUser, _ = db.UserQuerySimple(&user)
-	 *fmt.Println(resUser)
 	 */
+
 	fmt.Println(resUser)
 	/*
 	 *fmt.Println("indexValue", r.Form["indexValue"][0])
@@ -359,25 +383,55 @@ func searchUsers(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 func searchVideos(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	var user, resUser types.User
+	var videoID uint64
+	var err error
+	var timeStart, timeEnd time.Time
 
-	base := GetGlobalBase()
-	db := base.db
+	/*
+	 *base := GetGlobalBase()
+	 *db := base.db
+	 */
 	/*
 	 *ethcli := base.ethclient
 	 */
 
 	r.ParseForm()
-	fmt.Println("videoID", r.Form["videoID"][0])
+
 	videoIDStr := r.Form["videoID"][0]
-	videoID, _ := strconv.ParseUint(videoIDStr, 10, 64)
 	timeStartStr := r.Header.Get("Start-Time")
 	timeEndStr := r.Header.Get("End-Time")
-	fmt.Println("videoID", videoID, "timeStart", timeStartStr, "timeEnd", timeEndStr)
+
+	if videoIDStr != "" {
+		videoID, err = strconv.ParseUint(videoIDStr, 10, 64)
+		if err != nil {
+			return
+		}
+	}
+
+	if timeStartStr != "" {
+		timeStart, err = time.Parse("2006-01-02 15:04:05", timeStartStr)
+		if err != nil {
+			return
+		}
+		fmt.Println(timeStart)
+	}
+
+	if timeEndStr != "" {
+		timeEnd, err = time.Parse("2006-01-02 15:04:05", timeEndStr)
+		if err != nil {
+			return
+		}
+		fmt.Println(timeEnd)
+	}
+
+	fmt.Println("videoID", videoID, "timeStart", timeStart, "timeEnd", timeEnd)
 
 	/* search user info*/
 	user.UserID = videoID
 
-	resUser, _ = db.UserQuerySimple(&user)
+	/*
+	 *resUser, _ = db.UserQuerySimple(&user)
+	 */
 
 	fmt.Println(resUser)
 	/*
@@ -387,6 +441,9 @@ func searchVideos(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 
 func searchTransactions(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	var user, resUser types.User
+	var videoID uint64
+	var err error
+	var timeStart, timeEnd time.Time
 
 	/*
 	 *base := GetGlobalBase()
@@ -397,12 +454,35 @@ func searchTransactions(w http.ResponseWriter, r *http.Request, ps httprouter.Pa
 	 */
 
 	r.ParseForm()
-	fmt.Println("videoID", r.Form["videoID"][0])
+
 	videoIDStr := r.Form["videoID"][0]
-	videoID, _ := strconv.ParseUint(videoIDStr, 10, 64)
 	timeStartStr := r.Header.Get("Start-Time")
 	timeEndStr := r.Header.Get("End-Time")
-	fmt.Println("videoID", videoID, "timeStart", timeStartStr, "timeEnd", timeEndStr)
+
+	if videoIDStr != "" {
+		videoID, err = strconv.ParseUint(videoIDStr, 10, 64)
+		if err != nil {
+			return
+		}
+	}
+
+	if timeStartStr != "" {
+		timeStart, err = time.Parse("2006-01-02 15:04:05", timeStartStr)
+		if err != nil {
+			return
+		}
+		fmt.Println(timeStart)
+	}
+
+	if timeEndStr != "" {
+		timeEnd, err = time.Parse("2006-01-02 15:04:05", timeEndStr)
+		if err != nil {
+			return
+		}
+		fmt.Println(timeEnd)
+	}
+
+	fmt.Println("videoID", videoID, "timeStart", timeStart, "timeEnd", timeEnd)
 
 	/* search user info*/
 	user.UserID = videoID
@@ -418,10 +498,7 @@ func searchTransactions(w http.ResponseWriter, r *http.Request, ps httprouter.Pa
 }
 
 func NewServer(ctx *cli.Context) error {
-
 	router := NewHttpRouter()
-	base, _ := NewBase()
-	SetGlobalBase(base)
 	log.Fatal(http.ListenAndServe(":8080", router))
 
 	return nil
