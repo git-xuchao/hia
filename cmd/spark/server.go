@@ -1,3 +1,10 @@
+/**
+* @file server.go
+* @Synopsis
+* @author alan lin
+* @version 1.0
+* @date 2017-12-24
+ */
 package spark
 
 import (
@@ -13,9 +20,7 @@ import (
 	"gopkg.in/urfave/cli.v1"
 
 	"hia/cmd/spark/types"
-	/*
-	 *"hia/spark/ysdb"
-	 */)
+)
 
 var routes = types.Routes{
 	types.Route{"Index", "GET", "/", index},
@@ -24,7 +29,9 @@ var routes = types.Routes{
 	types.Route{"DeleteVideo", "DELETE", "/videos/:videoID", deleteVideo},
 	types.Route{"PurchaseVideo", "POST", "/transaction/:videoID", purchaseVideo},
 	types.Route{"PlayVideo", "GET", "/videos/:videoID", playVideo},
-	types.Route{"Search", "GET", "/record/users", searchUser},
+	types.Route{"SearchUsers", "GET", "/record/users", searchUsers},
+	types.Route{"SearchVideos", "GET", "/record/videos", searchVideos},
+	types.Route{"SearchTransactions", "GET", "/record/transactions", searchTransactions},
 }
 
 func index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
@@ -315,11 +322,13 @@ func playVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 }
 
-func searchUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func searchUsers(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	var user, resUser types.User
 
-	base := GetGlobalBase()
-	db := base.db
+	/*
+	 *base := GetGlobalBase()
+	 *db := base.db
+	 */
 	/*
 	 *ethcli := base.ethclient
 	 */
@@ -331,12 +340,76 @@ func searchUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	fmt.Println("userID", r.Form["userID"][0])
 	userIDStr := r.Form["userID"][0]
 	userID, _ := strconv.ParseUint(userIDStr, 10, 64)
-	fmt.Println(userID)
+	timeStartStr := r.Header.Get("Start-Time")
+	timeEndStr := r.Header.Get("End-Time")
+	fmt.Println("userID", userID, "timeStart", timeStartStr, "timeEnd", timeEndStr)
 
 	/* search user info*/
 	user.UserID = userID
 
+	/*
+	 *resUser, _ = db.UserQuerySimple(&user)
+	 *fmt.Println(resUser)
+	 */
+	fmt.Println(resUser)
+	/*
+	 *fmt.Println("indexValue", r.Form["indexValue"][0])
+	 */
+}
+
+func searchVideos(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	var user, resUser types.User
+
+	base := GetGlobalBase()
+	db := base.db
+	/*
+	 *ethcli := base.ethclient
+	 */
+
+	r.ParseForm()
+	fmt.Println("videoID", r.Form["videoID"][0])
+	videoIDStr := r.Form["videoID"][0]
+	videoID, _ := strconv.ParseUint(videoIDStr, 10, 64)
+	timeStartStr := r.Header.Get("Start-Time")
+	timeEndStr := r.Header.Get("End-Time")
+	fmt.Println("videoID", videoID, "timeStart", timeStartStr, "timeEnd", timeEndStr)
+
+	/* search user info*/
+	user.UserID = videoID
+
 	resUser, _ = db.UserQuerySimple(&user)
+
+	fmt.Println(resUser)
+	/*
+	 *fmt.Println("indexValue", r.Form["indexValue"][0])
+	 */
+}
+
+func searchTransactions(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	var user, resUser types.User
+
+	/*
+	 *base := GetGlobalBase()
+	 *db := base.db
+	 */
+	/*
+	 *ethcli := base.ethclient
+	 */
+
+	r.ParseForm()
+	fmt.Println("videoID", r.Form["videoID"][0])
+	videoIDStr := r.Form["videoID"][0]
+	videoID, _ := strconv.ParseUint(videoIDStr, 10, 64)
+	timeStartStr := r.Header.Get("Start-Time")
+	timeEndStr := r.Header.Get("End-Time")
+	fmt.Println("videoID", videoID, "timeStart", timeStartStr, "timeEnd", timeEndStr)
+
+	/* search user info*/
+	user.UserID = videoID
+
+	/*
+	 *resUser, _ = db.UserQuerySimple(&user)
+	 */
 
 	fmt.Println(resUser)
 	/*

@@ -231,11 +231,83 @@ func TestHttpPlayVideo(t *testing.T) {
 }
 
 func TestHttpSearch(t *testing.T) {
-	url := "http://127.0.0.1:8080//record/users?userID=987654326"
+	/*
+	 *url := "http://127.0.0.1:8080/record/users?userID=987654326&timeStart=2016-07-27 8:46:15&timeEnd=2016-07-28 8:46:15"
+	 */
+	url := "http://127.0.0.1:8080/record/users?userID=987654326&timeStart=2016-07-27&timeEnd=2016-07-28"
 
 	req, err := http.NewRequest("GET", url, bytes.NewBuffer([]byte("")))
 	// req.Header.Set("X-Custom-Header", "myvalue")
 	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	fmt.Println("response Status:", resp.Status)
+	fmt.Println("response Headers:", resp.Header)
+	body, _ := ioutil.ReadAll(resp.Body)
+	fmt.Println("response Body:", string(body))
+}
+
+func TestHttpSearchUsers(t *testing.T) {
+	/*
+	 *url := "http://127.0.0.1:8080/record/users?userID=987654326&timeStart=2016-07-27 8:46:15&timeEnd=2016-07-28 8:46:15"
+	 */
+	url := "http://127.0.0.1:8080/record/users?userID=987654326"
+
+	req, err := http.NewRequest("GET", url, bytes.NewBuffer([]byte("")))
+	// req.Header.Set("X-Custom-Header", "myvalue")
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Add("Start-Time", "2016-07-27 8:46:15")
+	req.Header.Add("End-Time", "2016-07-28 8:46:15")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	fmt.Println("response Status:", resp.Status)
+	fmt.Println("response Headers:", resp.Header)
+	body, _ := ioutil.ReadAll(resp.Body)
+	fmt.Println("response Body:", string(body))
+}
+
+func TestHttpSearchVideos(t *testing.T) {
+	url := "http://127.0.0.1:8080/record/videos?videoID=23412454326"
+
+	req, err := http.NewRequest("GET", url, bytes.NewBuffer([]byte("")))
+	// req.Header.Set("X-Custom-Header", "myvalue")
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Add("Start-Time", "2016-07-27 8:46:15")
+	req.Header.Add("End-Time", "2016-07-28 8:46:15")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	fmt.Println("response Status:", resp.Status)
+	fmt.Println("response Headers:", resp.Header)
+	body, _ := ioutil.ReadAll(resp.Body)
+	fmt.Println("response Body:", string(body))
+}
+
+func TestHttpSearchTransactions(t *testing.T) {
+	url := "http://127.0.0.1:8080/record/transactions?videoID=23412454326"
+
+	req, err := http.NewRequest("GET", url, bytes.NewBuffer([]byte("")))
+	// req.Header.Set("X-Custom-Header", "myvalue")
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Add("Start-Time", "2016-07-27 8:46:15")
+	req.Header.Add("End-Time", "2016-07-28 8:46:15")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)

@@ -1,3 +1,10 @@
+/**
+* @file main.go
+* @Synopsis
+* @author alan lin
+* @version 1.0
+* @date 2017-11-30
+ */
 package main
 
 import (
