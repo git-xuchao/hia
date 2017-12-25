@@ -101,6 +101,17 @@ var (
 			},
 		},
 	}
+
+	configFlag = cli.StringFlag{
+		Name:  "config",
+		Usage: "designate config file path",
+		Value: "./conf.ini",
+	}
+
+	debugFlag = cli.BoolFlag{
+		Name:  "debug",
+		Usage: "debug flag",
+	}
 )
 
 func init() {
@@ -112,15 +123,8 @@ func init() {
 	}
 
 	app.Flags = []cli.Flag{
-		cli.StringFlag{
-			Name:  "network1",
-			Usage: "name of the network to administer",
-			Value: "hello world",
-		},
-		cli.BoolFlag{
-			Name:  "rpc",
-			Usage: "Enable the HTTP-RPC server",
-		},
+		configFlag,
+		debugFlag,
 	}
 
 }

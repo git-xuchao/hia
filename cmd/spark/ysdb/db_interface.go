@@ -5,6 +5,8 @@ import (
 )
 
 type YsDb interface {
+	Init(driverName, dataSourceName string) error
+
 	UserAdd(user *types.User) error
 	UserUpdate(user *types.User) error
 	UserQuery(user *types.User, sqls string) (*[]types.User, error)

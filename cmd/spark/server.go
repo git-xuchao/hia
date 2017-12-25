@@ -328,57 +328,62 @@ func searchUsers(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	var userID uint64
 	var err error
 	var timeStart, timeEnd time.Time
+	var userIDStr string
 
-	/*
-	 *base := GetGlobalBase()
-	 *db := base.db
-	 */
-	/*
-	 *ethcli := base.ethclient
-	 */
+	base := GetGlobalBase()
+	db := base.db
 
 	r.ParseForm()
 
-	userIDStr := r.Form["userID"][0]
+	/*
+	 *userIDStr := r.Form["userID"][0]
+	 */
 	timeStartStr := r.Header.Get("Start-Time")
 	timeEndStr := r.Header.Get("End-Time")
+
+	fmt.Println("userID", userID, "timeStart", timeStartStr, "timeEnd", timeEndStr)
 
 	if userIDStr != "" {
 		userID, err = strconv.ParseUint(userIDStr, 10, 64)
 		if err != nil {
 			return
 		}
-	}
-
-	if timeStartStr != "" {
-		timeStart, err = time.Parse("2006-01-02 15:04:05", timeStartStr)
-		if err != nil {
-			return
+		user.UserID = userID
+		/*
+		 *search user info
+		 */
+		resUser, _ = db.UserQuerySimple(&user)
+		fmt.Println(resUser)
+	} else {
+		if timeStartStr != "" {
+			timeStart, err = time.Parse("2006-01-02 15:04:05", timeStartStr)
+			if err != nil {
+				return
+			}
+			fmt.Println(timeStart)
 		}
-		fmt.Println(timeStart)
-	}
 
-	if timeEndStr != "" {
-		timeEnd, err = time.Parse("2006-01-02 15:04:05", timeEndStr)
-		if err != nil {
-			return
+		if timeEndStr != "" {
+			timeEnd, err = time.Parse("2006-01-02 15:04:05", timeEndStr)
+			if err != nil {
+				return
+			}
+			fmt.Println(timeEnd)
 		}
-		fmt.Println(timeEnd)
+		var sqlStr string
+		var usersRes *[]types.User
+
+		fmt.Println("timeStart", timeStartStr, "timeEnd", timeEndStr)
+		sqlStr = fmt.Sprintf(" %d <= register_time <= %d ", timeStart.Unix(), timeEnd.Unix())
+
+		fmt.Println(sqlStr)
+		usersRes, err = db.UserQuery(&user, sqlStr)
+		if usersRes != nil {
+			for _, u := range *usersRes {
+				fmt.Println(u)
+			}
+		}
 	}
-
-	fmt.Println("userID", userID, "timeStart", timeStart, "timeEnd", timeEnd)
-
-	/* search user info*/
-	user.UserID = userID
-
-	/*
-	 *resUser, _ = db.UserQuerySimple(&user)
-	 */
-
-	fmt.Println(resUser)
-	/*
-	 *fmt.Println("indexValue", r.Form["indexValue"][0])
-	 */
 }
 
 func searchVideos(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {

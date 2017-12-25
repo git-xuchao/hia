@@ -8,6 +8,11 @@ import (
 type ABCDatabase struct {
 }
 
+func (this *ABCDatabase) Init(driverName, dataSourceName string) error {
+	fmt.Println("init")
+	return nil
+}
+
 func (this *ABCDatabase) UserAdd(user *types.User) error {
 	fmt.Println("UserAdd")
 	return nil

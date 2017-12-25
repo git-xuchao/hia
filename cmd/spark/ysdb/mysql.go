@@ -77,6 +77,31 @@ func (d *DbMysql) createAllTables() error {
 	return nil
 }
 
+func (d *DbMysql) Init(driverName, dataSourceName string) error {
+	var err error
+	/*
+	 *dbMysql.db, err = sql.Open("mysql", "root:root@tcp(192.168.31.19)/test")
+	 */
+	dbMysql.db, err = sql.Open(driverName, dataSourceName)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	err = dbMysql.db.Ping()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	err = dbMysql.createAllTables()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	log.Println("init db successful!")
+
+	return err
+}
+
 // all user operation
 func (d *DbMysql) UserAdd(user *types.User) error {
 	if nil == user {
@@ -251,6 +276,7 @@ func (d *DbMysql) UserQuery(user *types.User, sqls string) (*[]types.User, error
 
 	s += ";"
 
+	fmt.Println("sql", s)
 	rows, err := d.db.Query(s)
 	if err != nil {
 		return nil, err
@@ -611,26 +637,6 @@ func (d *DbMysql) VideoTransactionQuery(vt *types.VideoTransaction, sqls string)
 var (
 	dbMysql DbMysql
 )
-
-func init() {
-	var err error
-	dbMysql.db, err = sql.Open("mysql", "root:root@tcp(192.168.31.19)/test")
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	err = dbMysql.db.Ping()
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	err = dbMysql.createAllTables()
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	log.Println("init db successful!")
-}
 
 func NewDbMysql() *DbMysql {
 	return &dbMysql

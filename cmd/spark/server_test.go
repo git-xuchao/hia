@@ -231,12 +231,19 @@ func TestHttpPlayVideo(t *testing.T) {
 }
 
 func TestHttpSearchUsers(t *testing.T) {
-	url := "http://127.0.0.1:8080/record/users?userID=987654326"
+	/*
+	 *url := "http://127.0.0.1:8080/record/users?userID=987654326"
+	 */
+	url := "http://127.0.0.1:8080/record/users"
 
 	req, err := http.NewRequest("GET", url, bytes.NewBuffer([]byte("")))
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Add("Start-Time", "2016-07-27 8:46:15")
-	req.Header.Add("End-Time", "2016-07-28 8:46:15")
+	/*
+	 *req.Header.Add("Start-Time", "2017-07-27 8:46:15")
+	 *req.Header.Add("End-Time", "2017-12-28 8:46:15")
+	 */
+	req.Header.Add("Start-Time", "2017-12-22 16:08:46")
+	req.Header.Add("End-Time", "2017-12-28 8:47:15")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
