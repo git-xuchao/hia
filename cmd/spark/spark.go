@@ -70,10 +70,11 @@ func NewBase(ctx *cli.Context) (*Base, error) {
 	 *db, _ = ysdb.NewABCDatabase()
 	 */
 	db = ysdb.NewDbMysql()
+	db.Init(driverName, dataSourceName)
 	/*
-	 *db.Init(driverName, dataSourceName)
+	 *fmt.Printf("mysql:%s", driverName)
+	 *db.Init("mysql", "root:root@tcp(192.168.31.19)/test")
 	 */
-	db.Init("mysql", "root:root@tcp(192.168.31.19)/test")
 
 	return &Base{
 		ethclient: client,
