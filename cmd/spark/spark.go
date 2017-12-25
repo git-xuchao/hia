@@ -1,7 +1,9 @@
 package spark
 
 import (
-	"fmt"
+	/*
+	 *"fmt"
+	 */
 	"sync"
 
 	"gopkg.in/urfave/cli.v1"
@@ -47,12 +49,14 @@ func SetGlobalBase(b *Base) {
 }
 
 func NewSpark(ctx *cli.Context) error {
-	fmt.Println(ctx.GlobalString("network1"))
-	fmt.Println(ctx.String("network2"))
-	fmt.Println(ctx.String("network3"))
-	NewServer(ctx)
+	/*
+	 *fmt.Println(ctx.GlobalString("network1"))
+	 *fmt.Println(ctx.String("network2"))
+	 *fmt.Println(ctx.String("network3"))
+	 */
 	base, _ := NewBase()
 	SetGlobalBase(base)
+	NewServer(ctx)
 
 	return nil
 }
