@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/julienschmidt/httprouter"
 	"gopkg.in/urfave/cli.v1"
 
@@ -124,11 +125,7 @@ func uploadVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		}
 
 		//..........
-		/*
-		 *video.Transaction = string(result)
-		 */
-		video.Transaction = "asdafasdfdasfdasfsdf"
-		fmt.Println("video.Transaction", video.Transaction)
+		video.Transaction = common.ToHex(result)
 		video.VideoID = videoID
 		video.URL = video.URL
 
@@ -158,6 +155,8 @@ func deleteVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	fmt.Fprintf(w, "deleteVideo, video name %s!\n", ps.ByName("videoName"))
 	fmt.Printf("deleteVideo, video name %s!\n", ps.ByName("videoName"))
+
+	videoIDStr := ps.ByName("videoID")
 	body, _ := ioutil.ReadAll(r.Body)
 	body_str := string(body)
 	fmt.Println(body_str)
@@ -179,15 +178,25 @@ func deleteVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		ethcli.ConstructAbi2(resUser.EthAbi)
 		ethcli.SetCallMsg(&msg, resUser.EthAccount, resUser.EthContractAddr, "", "", "", nil)
 
-		result, err := ethcli.CallContractMethodPack(msg, resUser.Password, "deleteVideo", video.UserID, video.URL)
+		/*
+		 *userIDStr := strconv.FormatUint(video.UserID, 10)
+		 *fmt.Println("userIDStr", userIDStr)
+		 */
+
+		result, err := ethcli.CallContractMethodPack(msg, resUser.Password, "deleteVideo", video.URL)
 		if err != nil {
 			fmt.Printf("err: %v\n", err)
 		} else {
 			fmt.Printf("result %v\n", result)
 		}
-		video.Transaction = string(result)
 
-		db.VideoUpdate(&video)
+		video.Transaction = common.ToHex(result)
+		video.VideoID = videoIDStr
+
+		err = db.VideoDelete(&video)
+		if err != nil {
+			fmt.Printf("err: %v\n", err)
+		}
 	} else {
 		fmt.Println("json.Unmarshal err")
 		fmt.Println(err)
@@ -204,7 +213,7 @@ func purchaseVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 
 	fmt.Fprintf(w, "purchaseVideo, video name %s!\n", ps.ByName("videoName"))
 	fmt.Printf("purchaseVideo, video name %s!\n", ps.ByName("videoID"))
-	videoID := ps.ByName("videoID")
+	videoIDStr := ps.ByName("videoID")
 	body, _ := ioutil.ReadAll(r.Body)
 	/*
 	 *body_str := string(body)
@@ -214,9 +223,9 @@ func purchaseVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 	if err := json.Unmarshal(body, &video); err == nil {
 		var msg ethereum.CallMsg
 
-		fmt.Println("VideoName:", video.VideoName, ", url:", video.URL, ", UserID:", video.UserID, "videoID", videoID)
+		fmt.Println("VideoName:", video.VideoName, ", url:", video.URL, ", UserID:", video.UserID, "videoID", videoIDStr)
 		/* search video info*/
-		queryVideo.VideoID = videoID
+		queryVideo.VideoID = videoIDStr
 		/*
 		 *queryVideo.URL = video.URL
 		 */
@@ -249,12 +258,12 @@ func purchaseVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 		ethcli.ConstructAbi2(resUser.EthAbi)
 		ethcli.SetCallMsg(&msg, resUser.EthAccount, resUser.EthContractAddr, "", "", "", nil)
 
-		/*
-		 *result, err := ethcli.CallContractMethodPack(msg, resUser.Password, "purchaseVideo", video.UserID, video.URL)
-		 */
 		result, err := ethcli.CallContractMethodPack(msg, resUser.Password, "purchaseVideo", userIDStr, video.URL)
 		if err != nil {
 			fmt.Printf("err: %v\n", err)
+			/*
+			 *return
+			 */
 		} else {
 			fmt.Printf("result %v\n", result)
 		}
@@ -262,13 +271,14 @@ func purchaseVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 		/* add transaction info into db*/
 		var transaction types.VideoTransaction
 		transaction.UserID = video.UserID
-		/*
-		 *transaction.URL = video.URL
-		 */
-		transaction.Transaction = string(result)
+		transaction.Transaction = common.ToHex(result)
+		transaction.VideoID = videoIDStr
 
 		fmt.Println("VideoTransactionAdd")
-		db.VideoTransactionAdd(&transaction)
+		err = db.VideoTransactionAdd(&transaction)
+		if err != nil {
+			fmt.Printf("err: %v\n", err)
+		}
 
 	} else {
 		fmt.Println("json.Unmarshal err")
@@ -324,24 +334,28 @@ func playVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 }
 
 func searchUsers(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	var user, resUser types.User
+	var user types.User
 	var userID uint64
 	var err error
 	var timeStart, timeEnd time.Time
 	var userIDStr string
+	var userIDSlice []string
+	var usersRes *[]types.User
 
 	base := GetGlobalBase()
 	db := base.db
 
 	r.ParseForm()
 
-	/*
-	 *userIDStr := r.Form["userID"][0]
-	 */
+	userIDSlice = r.Form["userID"]
+	if len(userIDSlice) != 0 {
+		userIDStr = r.Form["userID"][0]
+	}
+
 	timeStartStr := r.Header.Get("Start-Time")
 	timeEndStr := r.Header.Get("End-Time")
 
-	fmt.Println("userID", userID, "timeStart", timeStartStr, "timeEnd", timeEndStr)
+	fmt.Println("userID", userIDStr, "timeStart", timeStartStr, "timeEnd", timeEndStr)
 
 	if userIDStr != "" {
 		userID, err = strconv.ParseUint(userIDStr, 10, 64)
@@ -349,157 +363,240 @@ func searchUsers(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 			return
 		}
 		user.UserID = userID
-		/*
-		 *search user info
-		 */
-		resUser, _ = db.UserQuerySimple(&user)
-		fmt.Println(resUser)
+	}
+
+	if timeStartStr != "" && timeEndStr != "" {
+		timeStart, err = time.Parse("2006-01-02 15:04:05", timeStartStr)
+		if err != nil {
+			return
+		}
+
+		timeEnd, err = time.Parse("2006-01-02 15:04:05", timeEndStr)
+		if err != nil {
+			return
+		}
+
+		usersRes, err = db.UserQueryBetween(&user, timeStart, timeEnd)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	} else if timeEndStr != "" {
+		timeEnd, err = time.Parse("2006-01-02 15:04:05", timeEndStr)
+		if err != nil {
+			return
+		}
+		usersRes, err = db.UserQueryBefore(&user, timeEnd)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 	} else {
-		if timeStartStr != "" {
-			timeStart, err = time.Parse("2006-01-02 15:04:05", timeStartStr)
-			if err != nil {
-				return
-			}
-			fmt.Println(timeStart)
+		timeStart, err = time.Parse("2006-01-02 15:04:05", timeStartStr)
+		if err != nil {
+			return
 		}
-
-		if timeEndStr != "" {
-			timeEnd, err = time.Parse("2006-01-02 15:04:05", timeEndStr)
-			if err != nil {
-				return
-			}
-			fmt.Println(timeEnd)
+		usersRes, err = db.UserQueryAfter(&user, timeStart)
+		if err != nil {
+			fmt.Println(err)
+			return
 		}
-		var sqlStr string
-		var usersRes *[]types.User
+	}
 
-		fmt.Println("timeStart", timeStartStr, "timeEnd", timeEndStr)
-		sqlStr = fmt.Sprintf(" %d <= register_time <= %d ", timeStart.Unix(), timeEnd.Unix())
-
-		fmt.Println(sqlStr)
-		usersRes, err = db.UserQuery(&user, sqlStr)
-		if usersRes != nil {
-			for _, u := range *usersRes {
-				fmt.Println(u)
-			}
+	if usersRes != nil {
+		for _, u := range *usersRes {
+			fmt.Println(u)
 		}
+	}
+
+	fmt.Println("\n")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(*usersRes); err != nil {
+		panic(err)
 	}
 }
 
 func searchVideos(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	var user, resUser types.User
-	var videoID uint64
+	var video types.Video
 	var err error
 	var timeStart, timeEnd time.Time
+	var videoIDStr string
+	var videoIDSlice []string
+	var videosRes *[]types.Video
 
-	/*
-	 *base := GetGlobalBase()
-	 *db := base.db
-	 */
-	/*
-	 *ethcli := base.ethclient
-	 */
+	base := GetGlobalBase()
+	db := base.db
 
 	r.ParseForm()
 
-	videoIDStr := r.Form["videoID"][0]
+	/*
+	 *videoIDStr := r.Form["videoID"][0]
+	 */
+	videoIDSlice = r.Form["videoID"]
+	if len(videoIDSlice) != 0 {
+		videoIDStr = r.Form["videoID"][0]
+	}
 	timeStartStr := r.Header.Get("Start-Time")
 	timeEndStr := r.Header.Get("End-Time")
 
+	fmt.Println("videoID", videoIDStr, "timeStart", timeStartStr, "timeEnd", timeEndStr)
+
 	if videoIDStr != "" {
-		videoID, err = strconv.ParseUint(videoIDStr, 10, 64)
-		if err != nil {
-			return
-		}
+		video.VideoID = videoIDStr
 	}
 
-	if timeStartStr != "" {
+	if timeStartStr != "" && timeEndStr != "" {
 		timeStart, err = time.Parse("2006-01-02 15:04:05", timeStartStr)
 		if err != nil {
 			return
 		}
-		fmt.Println(timeStart)
-	}
 
-	if timeEndStr != "" {
 		timeEnd, err = time.Parse("2006-01-02 15:04:05", timeEndStr)
 		if err != nil {
 			return
 		}
-		fmt.Println(timeEnd)
+		videosRes, err = db.VideoQueryBetween(&video, timeStart, timeEnd)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	} else if timeEndStr != "" {
+		timeEnd, err = time.Parse("2006-01-02 15:04:05", timeEndStr)
+		if err != nil {
+			return
+		}
+		videosRes, err = db.VideoQueryBefore(&video, timeEnd)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	} else {
+		timeStart, err = time.Parse("2006-01-02 15:04:05", timeStartStr)
+		if err != nil {
+			return
+		}
+		videosRes, err = db.VideoQueryAfter(&video, timeStart)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 	}
 
-	fmt.Println("videoID", videoID, "timeStart", timeStart, "timeEnd", timeEnd)
+	if videosRes != nil {
+		for _, u := range *videosRes {
+			fmt.Println(u)
+		}
+	} else {
+		return
+	}
 
-	/* search user info*/
-	user.UserID = videoID
+	fmt.Println("\n")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 
-	/*
-	 *resUser, _ = db.UserQuerySimple(&user)
-	 */
-
-	fmt.Println(resUser)
-	/*
-	 *fmt.Println("indexValue", r.Form["indexValue"][0])
-	 */
+	if err := json.NewEncoder(w).Encode(*videosRes); err != nil {
+		panic(err)
+	}
 }
 
 func searchTransactions(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	var user, resUser types.User
-	var videoID uint64
+	var transaction types.VideoTransaction
 	var err error
+	var userID uint64
 	var timeStart, timeEnd time.Time
+	var videoIDStr, userIDStr string
+	var videoIDSlice, userIDSlice []string
+	var transactionsRes *[]types.VideoTransaction
 
-	/*
-	 *base := GetGlobalBase()
-	 *db := base.db
-	 */
-	/*
-	 *ethcli := base.ethclient
-	 */
+	base := GetGlobalBase()
+	db := base.db
 
 	r.ParseForm()
 
-	videoIDStr := r.Form["videoID"][0]
+	/*get pars*/
+	videoIDSlice = r.Form["videoID"]
+	if len(videoIDSlice) != 0 {
+		videoIDStr = r.Form["videoID"][0]
+	}
+
+	userIDSlice = r.Form["userID"]
+	if len(userIDSlice) != 0 {
+		userIDStr = r.Form["userID"][0]
+	}
+
 	timeStartStr := r.Header.Get("Start-Time")
 	timeEndStr := r.Header.Get("End-Time")
 
+	fmt.Println("videoID", videoIDStr, "timeStart", timeStartStr, "timeEnd", timeEndStr)
+
 	if videoIDStr != "" {
-		videoID, err = strconv.ParseUint(videoIDStr, 10, 64)
+		transaction.VideoID = videoIDStr
+	} else if userIDStr != "" {
+		userID, err = strconv.ParseUint(userIDStr, 10, 64)
 		if err != nil {
 			return
 		}
+		transaction.UserID = userID
 	}
 
-	if timeStartStr != "" {
+	if timeStartStr != "" && timeEndStr != "" {
 		timeStart, err = time.Parse("2006-01-02 15:04:05", timeStartStr)
 		if err != nil {
 			return
 		}
-		fmt.Println(timeStart)
-	}
 
-	if timeEndStr != "" {
 		timeEnd, err = time.Parse("2006-01-02 15:04:05", timeEndStr)
 		if err != nil {
 			return
 		}
-		fmt.Println(timeEnd)
+
+		transactionsRes, err = db.VideoTransactionQueryBetween(&transaction, timeStart, timeEnd)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+	} else if timeEndStr != "" {
+		timeEnd, err = time.Parse("2006-01-02 15:04:05", timeEndStr)
+		if err != nil {
+			return
+		}
+		transactionsRes, err = db.VideoTransactionQueryBefore(&transaction, timeEnd)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+	} else {
+		timeStart, err = time.Parse("2006-01-02 15:04:05", timeStartStr)
+		if err != nil {
+			return
+		}
+		transactionsRes, err = db.VideoTransactionQueryAfter(&transaction, timeStart)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 	}
 
-	fmt.Println("videoID", videoID, "timeStart", timeStart, "timeEnd", timeEnd)
+	if transactionsRes != nil {
+		for _, u := range *transactionsRes {
+			fmt.Println(u)
+		}
+	} else {
+		fmt.Println("transactionsRes is nil")
+		return
+	}
 
-	/* search user info*/
-	user.UserID = videoID
+	fmt.Println("\n")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 
-	/*
-	 *resUser, _ = db.UserQuerySimple(&user)
-	 */
-
-	fmt.Println(resUser)
-	/*
-	 *fmt.Println("indexValue", r.Form["indexValue"][0])
-	 */
+	if err := json.NewEncoder(w).Encode(*transactionsRes); err != nil {
+		panic(err)
+	}
 }
 
 func NewServer(ctx *cli.Context) error {

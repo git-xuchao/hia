@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/go-sql-driver/mysql"
 
@@ -333,6 +334,24 @@ func (d *DbMysql) UserQuery(user *types.User, sqls string) (*[]types.User, error
 	return &res, nil
 }
 
+func (d *DbMysql) UserQueryBetween(user *types.User, start time.Time, end time.Time) (*[]types.User, error) {
+	fmt.Println("UserQueryBetween", "timeStart", start, "timeEnd", end)
+	sqlStr := fmt.Sprintf(" %d <= register_time <= %d ", start.Unix(), end.Unix())
+	return d.UserQuery(user, sqlStr)
+}
+
+func (d *DbMysql) UserQueryAfter(user *types.User, time time.Time) (*[]types.User, error) {
+	fmt.Println("UserQueryAfter", "time", time)
+	sqlStr := fmt.Sprintf(" %d <= register_time", time.Unix())
+	return d.UserQuery(user, sqlStr)
+}
+
+func (d *DbMysql) UserQueryBefore(user *types.User, time time.Time) (*[]types.User, error) {
+	fmt.Println("UserQueryBefore", "time", time)
+	sqlStr := fmt.Sprintf(" register_time <= %d ", time.Unix())
+	return d.UserQuery(user, sqlStr)
+}
+
 func (d *DbMysql) UserQuerySimple(user *types.User) (types.User, error) {
 	searchUser, err := d.UserQuery(user, "")
 
@@ -486,7 +505,12 @@ func (d *DbMysql) VideoQuery(video *types.Video, sqls string) (*[]types.Video, e
 
 	s += ";"
 
+	fmt.Println("sql", s)
 	rows, err := d.db.Query(s)
+	if err != nil {
+		return nil, err
+	}
+
 	res := make([]types.Video, 0, 10)
 	for rows.Next() {
 		var temp types.Video
@@ -524,6 +548,24 @@ func (d *DbMysql) VideoQuery(video *types.Video, sqls string) (*[]types.Video, e
 	return &res, nil
 }
 
+func (d *DbMysql) VideoQueryBetween(video *types.Video, start time.Time, end time.Time) (*[]types.Video, error) {
+	fmt.Println("VideoQueryBetween", "timeStart", start, "timeEnd", end)
+	sqlStr := fmt.Sprintf(" %d <= upload_time <= %d ", start.Unix(), end.Unix())
+	return d.VideoQuery(video, sqlStr)
+}
+
+func (d *DbMysql) VideoQueryBefore(video *types.Video, end time.Time) (*[]types.Video, error) {
+	fmt.Println("VideoQueryBefore", "timeEnd", end)
+	sqlStr := fmt.Sprintf(" upload_time <= %d ", end.Unix())
+	return d.VideoQuery(video, sqlStr)
+}
+
+func (d *DbMysql) VideoQueryAfter(video *types.Video, start time.Time) (*[]types.Video, error) {
+	fmt.Println("VideoQueryAfter", "timeStart", start)
+	sqlStr := fmt.Sprintf(" upload_time <= %d ", start.Unix())
+	return d.VideoQuery(video, sqlStr)
+}
+
 func (d *DbMysql) VideoQuerySimple(video *types.Video) (types.Video, error) {
 	fmt.Println("VideoQuerySimple")
 	searchVideo, err := d.VideoQuery(video, "")
@@ -543,6 +585,8 @@ func (d *DbMysql) VideoDelete(video *types.Video) error {
 
 	s := fmt.Sprintf("delete from video where video_id = \"%s\";", video.VideoID)
 
+	fmt.Println("VideoDelete sql", s)
+
 	_, err := d.db.Exec(s)
 
 	return err
@@ -557,6 +601,7 @@ func (d *DbMysql) VideoTransactionAdd(vt *types.VideoTransaction) error {
 	s := fmt.Sprintf("insert video_transaction set transaction_id = \"%s\", video_id = \"%s\", transaction = \"%s\", user_id= %d ;",
 		vt.TransactionId, vt.VideoID, vt.Transaction, vt.UserID)
 
+	fmt.Println("VideoTransactionAdd sql", s)
 	_, err := d.db.Exec(s)
 
 	return err
@@ -586,10 +631,6 @@ func (d *DbMysql) VideoTransactionQuery(vt *types.VideoTransaction, sqls string)
 		s += fmt.Sprintf(format, "video_id", vt.VideoID)
 	}
 
-	if 0 != vt.BuyTime {
-		s += fmt.Sprintf(format2, "buy_time", vt.BuyTime)
-	}
-
 	if "" != vt.TransactionId {
 		s += fmt.Sprintf(format, "transaction_id", vt.TransactionId)
 	}
@@ -610,15 +651,23 @@ func (d *DbMysql) VideoTransactionQuery(vt *types.VideoTransaction, sqls string)
 
 	res := make([]types.VideoTransaction, 0, 10)
 
+	fmt.Println("VideoTransactionQuery sql", s)
 	rows, err := d.db.Query(s)
-	if rows.Next() {
-		var temp types.VideoTransaction
+	if err != nil {
+		return nil, err
+	}
 
-		err = rows.Scan(&temp.BuyTime, &temp.TransactionId, &temp.VideoID, &temp.UserID, &temp.Transaction)
+	for rows.Next() {
+		var temp types.VideoTransaction
+		var buyTime mysql.NullTime
+
+		err = rows.Scan(&buyTime, &temp.TransactionId, &temp.VideoID, &temp.UserID, &temp.Transaction)
 
 		if err != nil {
-			return nil, nil
+			return nil, err
 		}
+
+		temp.BuyTime = buyTime.Time
 
 		res = append(res, temp)
 	}
@@ -631,6 +680,24 @@ func (d *DbMysql) VideoTransactionQuery(vt *types.VideoTransaction, sqls string)
 		return nil, nil
 	}
 	return &res, nil
+}
+
+func (d *DbMysql) VideoTransactionQueryBetween(transaction *types.VideoTransaction, start time.Time, end time.Time) (*[]types.VideoTransaction, error) {
+	fmt.Println("VideoTransactionQueryBetween", "timeStart", start, "timeEnd", end)
+	sqlStr := fmt.Sprintf(" %d <= buy_time <= %d ", start.Unix(), end.Unix())
+	return d.VideoTransactionQuery(transaction, sqlStr)
+}
+
+func (d *DbMysql) VideoTransactionQueryAfter(transaction *types.VideoTransaction, time time.Time) (*[]types.VideoTransaction, error) {
+	fmt.Println("VideoTransactionQueryAfter", "time", time)
+	sqlStr := fmt.Sprintf(" %d <= buy_time", time.Unix())
+	return d.VideoTransactionQuery(transaction, sqlStr)
+}
+
+func (d *DbMysql) VideoTransactionQueryBefore(transaction *types.VideoTransaction, time time.Time) (*[]types.VideoTransaction, error) {
+	fmt.Println("VideoTransactionQueryBefore", "time", time)
+	sqlStr := fmt.Sprintf(" buy_time <= %d ", time.Unix())
+	return d.VideoTransactionQuery(transaction, sqlStr)
 }
 
 //////////////////////////////

@@ -3,6 +3,7 @@ package ysdb
 import (
 	"fmt"
 	"hia/cmd/spark/types"
+	"time"
 )
 
 type ABCDatabase struct {
@@ -25,6 +26,21 @@ func (this *ABCDatabase) UserUpdate(user *types.User) error {
 
 func (this *ABCDatabase) UserQuery(user *types.User, sqls string) (*[]types.User, error) {
 	fmt.Println("UserQuery")
+	return nil, nil
+}
+
+func (this *ABCDatabase) UserQueryBetween(user *types.User, start time.Time, end time.Time) (*[]types.User, error) {
+	fmt.Println("UserQueryBetween")
+	return nil, nil
+}
+
+func (this *ABCDatabase) UserQueryAfter(user *types.User, time time.Time) (*[]types.User, error) {
+	fmt.Println("UserQueryAfter")
+	return nil, nil
+}
+
+func (this *ABCDatabase) UserQueryBefore(user *types.User, time time.Time) (*[]types.User, error) {
+	fmt.Println("UserQueryBefore")
 	return nil, nil
 }
 
@@ -54,6 +70,21 @@ func (this *ABCDatabase) VideoQuery(video *types.Video, sqls string) (*[]types.V
 	return nil, nil
 }
 
+func (this *ABCDatabase) VideoQueryBetween(video *types.Video, start time.Time, end time.Time) (*[]types.Video, error) {
+	fmt.Println("VideoQueryBetween")
+	return nil, nil
+}
+
+func (this *ABCDatabase) VideoQueryBefore(video *types.Video, end time.Time) (*[]types.Video, error) {
+	fmt.Println("VideoQueryBefore")
+	return nil, nil
+}
+
+func (this *ABCDatabase) VideoQueryAfter(video *types.Video, start time.Time) (*[]types.Video, error) {
+	fmt.Println("VideoQueryAfter")
+	return nil, nil
+}
+
 func (this *ABCDatabase) VideoQuerySimple(video *types.Video) (types.Video, error) {
 	fmt.Println("VideoQuerySimple")
 	var newVideo types.Video
@@ -72,6 +103,21 @@ func (this *ABCDatabase) VideoTransactionAdd(vt *types.VideoTransaction) error {
 
 func (this *ABCDatabase) VideoTransactionQuery(vt *types.VideoTransaction, sqls string) (*[]types.VideoTransaction, error) {
 	fmt.Println("VideoTransactionQuery")
+	return nil, nil
+}
+
+func (this *ABCDatabase) VideoTransactionQueryBetween(vt *types.VideoTransaction, start time.Time, end time.Time) (*[]types.VideoTransaction, error) {
+	fmt.Println("VideoTransactionQueryBetwee")
+	return nil, nil
+}
+
+func (this *ABCDatabase) VideoTransactionQueryAfter(vt *types.VideoTransaction, time time.Time) (*[]types.VideoTransaction, error) {
+	fmt.Println("VideoTransactionQueryAfter")
+	return nil, nil
+}
+
+func (this *ABCDatabase) VideoTransactionQueryBefore(vt *types.VideoTransaction, time time.Time) (*[]types.VideoTransaction, error) {
+	fmt.Println("VideoTransactionQueryBefore")
 	return nil, nil
 }
 

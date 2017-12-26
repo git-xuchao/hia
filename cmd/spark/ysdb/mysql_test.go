@@ -31,6 +31,7 @@ func TestMySQLAddAuthorUser(t *testing.T) {
 	// user.Email = "a"
 
 	db := NewDbMysql()
+	db.Init("mysql", "root:root@tcp(192.168.31.19)/test")
 
 	err := db.UserAdd(&user)
 	if err != nil {
@@ -54,6 +55,7 @@ func TestMySQLAddCommonUser(t *testing.T) {
 	user.EthAccount = "0x40b0eb2afe313d260b7574d4ffc6a130e9ad28ed"
 
 	db := NewDbMysql()
+	db.Init("mysql", "root:root@tcp(192.168.31.19)/test")
 
 	err := db.UserAdd(&user)
 	if err != nil {

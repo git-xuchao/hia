@@ -111,7 +111,7 @@ func TestHttpDeleteVideo(t *testing.T) {
 	url := "http://127.0.0.1:8080/videos/abc.flv"
 
 	video := &types.Video{
-		UserID: 1581341302,
+		UserID: 987654325,
 		/*
 		 *UserName:  "alan",
 		 */
@@ -151,8 +151,15 @@ func TestHttpDeleteVideo(t *testing.T) {
 func TestHttpPurchaceVideo(t *testing.T) {
 	url := "http://127.0.0.1:8080/transaction/abc.flv"
 
+	/*
+	 *video := &types.Video{
+	 *    UserID: 987654326,
+	 *    URL:       "http://127.0.0.1:8080/videos/abc.flv",
+	 *    VideoName: "abc.flv",
+	 *}
+	 */
 	video := &types.Video{
-		UserID: 987654326,
+		UserID: 1581341302,
 		/*
 		 *UserName:  "alan",
 		 */
@@ -243,7 +250,9 @@ func TestHttpSearchUsers(t *testing.T) {
 	 *req.Header.Add("End-Time", "2017-12-28 8:46:15")
 	 */
 	req.Header.Add("Start-Time", "2017-12-22 16:08:46")
-	req.Header.Add("End-Time", "2017-12-28 8:47:15")
+	/*
+	 *req.Header.Add("End-Time", "2017-12-28 8:47:15")
+	 */
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -259,7 +268,10 @@ func TestHttpSearchUsers(t *testing.T) {
 }
 
 func TestHttpSearchVideos(t *testing.T) {
-	url := "http://127.0.0.1:8080/record/videos?videoID=23412454326"
+	/*
+	 *url := "http://127.0.0.1:8080/record/videos?videoID=23412454326"
+	 */
+	url := "http://127.0.0.1:8080/record/videos"
 
 	req, err := http.NewRequest("GET", url, bytes.NewBuffer([]byte("")))
 	req.Header.Set("Content-Type", "application/json")
@@ -280,12 +292,15 @@ func TestHttpSearchVideos(t *testing.T) {
 }
 
 func TestHttpSearchTransactions(t *testing.T) {
-	url := "http://127.0.0.1:8080/record/transactions?videoID=23412454326"
+	/*
+	 *url := "http://127.0.0.1:8080/record/transactions?videoID=23412454326"
+	 */
+	url := "http://127.0.0.1:8080/record/transactions"
 
 	req, err := http.NewRequest("GET", url, bytes.NewBuffer([]byte("")))
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Add("Start-Time", "2016-07-27 8:46:15")
-	req.Header.Add("End-Time", "2016-07-28 8:46:15")
+	req.Header.Add("Start-Time", "2015-07-27 8:46:15")
+	req.Header.Add("End-Time", "2017-12-28 8:46:15")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
