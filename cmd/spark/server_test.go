@@ -238,10 +238,10 @@ func TestHttpPlayVideo(t *testing.T) {
 }
 
 func TestHttpSearchUsers(t *testing.T) {
+	url := "http://127.0.0.1:8080/record/users?userID=1581341302"
 	/*
-	 *url := "http://127.0.0.1:8080/record/users?userID=987654326"
+	 *url := "http://127.0.0.1:8080/record/users"
 	 */
-	url := "http://127.0.0.1:8080/record/users"
 
 	req, err := http.NewRequest("GET", url, bytes.NewBuffer([]byte("")))
 	req.Header.Set("Content-Type", "application/json")
@@ -271,7 +271,7 @@ func TestHttpSearchVideos(t *testing.T) {
 	/*
 	 *url := "http://127.0.0.1:8080/record/videos?videoID=23412454326"
 	 */
-	url := "http://127.0.0.1:8080/record/videos"
+	url := "http://127.0.0.1:8080/record/videos?indexType=uploadRecord&userID=987654325"
 
 	req, err := http.NewRequest("GET", url, bytes.NewBuffer([]byte("")))
 	req.Header.Set("Content-Type", "application/json")

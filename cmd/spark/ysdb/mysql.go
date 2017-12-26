@@ -41,23 +41,32 @@ func (d *DbMysql) createAllTables() error {
             video_id varchar(256) primary key,
             video_name varchar(256),
             url varchar(256) not null,
-            user_id bigint not null,
+            user_id bigint,
             transaction varchar(64) not null,
             status boolean default true,
             plays int not null default 0,
             buys int not null default 0,
-            constraint user_id foreign key(user_id) references user(user_id)
+            constraint video_user_id_fk
+                foreign key(user_id) references user(user_id)
+                on delete set null
+                on update cascade
         );
     `
 	createVideoTransactionTable := `
         create table if not exists video_transaction (
             buy_time timestamp not null default current_timestamp,
             transaction_id varchar(100) not null,
-            video_id varchar(256) not null,
-            user_id bigint not null,
+            video_id varchar(256),
+            user_id bigint,
             transaction varchar(100) not null,
-            constraint  video_id foreign key(video_id) references video(video_id),
-            constraint buy_uid foreign key(user_id) references user(user_id)
+            constraint  video_transaction_video_id
+                foreign key(video_id) references video(video_id)
+                on delete set null
+                on update cascade,
+            constraint video_transaction_user_id
+                foreign key(user_id) references user(user_id)
+                on delete set null
+                on update cascade
         );
     `
 	_, err := d.db.Exec(createUserTable)

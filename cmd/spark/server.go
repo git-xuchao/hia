@@ -413,7 +413,13 @@ func searchUsers(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	if err := json.NewEncoder(w).Encode(*usersRes); err != nil {
+	body := struct {
+		Data interface{} `json:"users"`
+	}{
+		Data: *usersRes,
+	}
+
+	if err := json.NewEncoder(w).Encode(body); err != nil {
 		panic(err)
 	}
 }
@@ -421,9 +427,9 @@ func searchUsers(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 func searchVideos(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	var video types.Video
 	var err error
+	var userID uint64
 	var timeStart, timeEnd time.Time
-	var videoIDStr string
-	var videoIDSlice []string
+	var videoIDStr, userIDStr, indexTypeStr string
 	var videosRes *[]types.Video
 
 	base := GetGlobalBase()
@@ -431,20 +437,55 @@ func searchVideos(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 
 	r.ParseForm()
 
-	/*
-	 *videoIDStr := r.Form["videoID"][0]
-	 */
-	videoIDSlice = r.Form["videoID"]
+	videoIDSlice := r.Form["videoID"]
 	if len(videoIDSlice) != 0 {
 		videoIDStr = r.Form["videoID"][0]
 	}
+
+	userIDSlice := r.Form["userID"]
+	if len(userIDSlice) != 0 {
+		userIDStr = r.Form["userID"][0]
+	}
+
+	indexTypeSlice := r.Form["indexType"]
+	if len(indexTypeSlice) != 0 {
+		indexTypeStr = r.Form["indexType"][0]
+	}
+
 	timeStartStr := r.Header.Get("Start-Time")
 	timeEndStr := r.Header.Get("End-Time")
+
+	switch indexTypeStr {
+	case "uploadRecord":
+		if userIDStr == "" {
+			fmt.Printf("searchVideos, indexType %s,  userID is not set", indexTypeStr)
+			return
+		}
+	case "videoRanking":
+		return
+
+	case "videoAttrib":
+		if videoIDStr == "" {
+			fmt.Printf("searchVideos, indexType %s,  videoID is not set", indexTypeStr)
+			return
+		}
+	case "videoState":
+		if videoIDStr == "" {
+			fmt.Printf("searchVideos, indexType %s,  videoID is not set", indexTypeStr)
+			return
+		}
+	}
 
 	fmt.Println("videoID", videoIDStr, "timeStart", timeStartStr, "timeEnd", timeEndStr)
 
 	if videoIDStr != "" {
 		video.VideoID = videoIDStr
+	} else if userIDStr != "" {
+		userID, err = strconv.ParseUint(userIDStr, 10, 64)
+		if err != nil {
+			return
+		}
+		video.UserID = userID
 	}
 
 	if timeStartStr != "" && timeEndStr != "" {
@@ -496,8 +537,46 @@ func searchVideos(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	if err := json.NewEncoder(w).Encode(*videosRes); err != nil {
-		panic(err)
+	switch indexTypeStr {
+	case "uploadRecord":
+		body := struct {
+			Data interface{} `json:"uploadRecord"`
+		}{
+			Data: *videosRes,
+		}
+		if err := json.NewEncoder(w).Encode(body); err != nil {
+			panic(err)
+		}
+
+	case "videoRanking":
+		body := struct {
+			Data interface{} `json:"videoRanking"`
+		}{
+			Data: *videosRes,
+		}
+		if err := json.NewEncoder(w).Encode(body); err != nil {
+			panic(err)
+		}
+
+	case "videoAttrib":
+		body := struct {
+			Data interface{} `json:"videoAttrib"`
+		}{
+			Data: *videosRes,
+		}
+		if err := json.NewEncoder(w).Encode(body); err != nil {
+			panic(err)
+		}
+	case "videoState":
+		body := struct {
+			Data interface{} `json:"videoState"`
+		}{
+			Data: *videosRes,
+		}
+		if err := json.NewEncoder(w).Encode(body); err != nil {
+			panic(err)
+		}
+
 	}
 }
 
@@ -594,7 +673,13 @@ func searchTransactions(w http.ResponseWriter, r *http.Request, ps httprouter.Pa
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	if err := json.NewEncoder(w).Encode(*transactionsRes); err != nil {
+	body := struct {
+		Data interface{} `json:"transactions"`
+	}{
+		Data: *transactionsRes,
+	}
+
+	if err := json.NewEncoder(w).Encode(body); err != nil {
 		panic(err)
 	}
 }
