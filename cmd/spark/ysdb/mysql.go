@@ -2,6 +2,7 @@ package ysdb
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -42,7 +43,7 @@ func (d *DbMysql) createAllTables() error {
             video_name varchar(256),
             url varchar(256) not null,
             user_id bigint,
-            transaction varchar(64) not null,
+            transaction varchar(128) not null,
             status boolean default true,
             plays int not null default 0,
             buys int not null default 0,
@@ -58,7 +59,7 @@ func (d *DbMysql) createAllTables() error {
             transaction_id varchar(100) not null,
             video_id varchar(256),
             user_id bigint,
-            transaction varchar(100) not null,
+            transaction varchar(128) not null,
             constraint  video_transaction_video_id
                 foreign key(video_id) references video(video_id)
                 on delete set null
@@ -340,29 +341,36 @@ func (d *DbMysql) UserQuery(user *types.User, sqls string) (*[]types.User, error
 		return nil, err
 	}
 
+	if len(res) == 0 {
+		return nil, nil
+	}
+
 	return &res, nil
 }
 
-func (d *DbMysql) UserQueryBetween(user *types.User, start time.Time, end time.Time) (*[]types.User, error) {
+func (d *DbMysql) UserQueryBetween(user *types.User, start time.Time, end time.Time, page int, count int) (*[]types.User, error) {
 	fmt.Println("UserQueryBetween", "timeStart", start, "timeEnd", end)
-	sqlStr := fmt.Sprintf(" %d <= register_time <= %d ", start.Unix(), end.Unix())
+	sqlStr := fmt.Sprintf(" %d <= register_time <= %d limit %d", start.Unix(), end.Unix(), count)
 	return d.UserQuery(user, sqlStr)
 }
 
-func (d *DbMysql) UserQueryAfter(user *types.User, time time.Time) (*[]types.User, error) {
+func (d *DbMysql) UserQueryAfter(user *types.User, time time.Time, page int, count int) (*[]types.User, error) {
 	fmt.Println("UserQueryAfter", "time", time)
-	sqlStr := fmt.Sprintf(" %d <= register_time", time.Unix())
+	sqlStr := fmt.Sprintf(" %d <= register_time limit %d", time.Unix(), count)
 	return d.UserQuery(user, sqlStr)
 }
 
-func (d *DbMysql) UserQueryBefore(user *types.User, time time.Time) (*[]types.User, error) {
+func (d *DbMysql) UserQueryBefore(user *types.User, time time.Time, page int, count int) (*[]types.User, error) {
 	fmt.Println("UserQueryBefore", "time", time)
-	sqlStr := fmt.Sprintf(" register_time <= %d ", time.Unix())
+	sqlStr := fmt.Sprintf(" register_time <= %d limit %d", time.Unix(), count)
 	return d.UserQuery(user, sqlStr)
 }
 
 func (d *DbMysql) UserQuerySimple(user *types.User) (types.User, error) {
 	searchUser, err := d.UserQuery(user, "")
+	if len(*searchUser) == 0 {
+		return *user, errors.New("result is null")
+	}
 
 	return (*searchUser)[0], err
 }
@@ -557,21 +565,21 @@ func (d *DbMysql) VideoQuery(video *types.Video, sqls string) (*[]types.Video, e
 	return &res, nil
 }
 
-func (d *DbMysql) VideoQueryBetween(video *types.Video, start time.Time, end time.Time) (*[]types.Video, error) {
+func (d *DbMysql) VideoQueryBetween(video *types.Video, start time.Time, end time.Time, page int, count int) (*[]types.Video, error) {
 	fmt.Println("VideoQueryBetween", "timeStart", start, "timeEnd", end)
-	sqlStr := fmt.Sprintf(" %d <= upload_time <= %d ", start.Unix(), end.Unix())
+	sqlStr := fmt.Sprintf(" %d <= upload_time <= %d limit %d", start.Unix(), end.Unix(), count)
 	return d.VideoQuery(video, sqlStr)
 }
 
-func (d *DbMysql) VideoQueryBefore(video *types.Video, end time.Time) (*[]types.Video, error) {
+func (d *DbMysql) VideoQueryBefore(video *types.Video, end time.Time, page int, count int) (*[]types.Video, error) {
 	fmt.Println("VideoQueryBefore", "timeEnd", end)
-	sqlStr := fmt.Sprintf(" upload_time <= %d ", end.Unix())
+	sqlStr := fmt.Sprintf(" upload_time <= %d limit %d", end.Unix(), count)
 	return d.VideoQuery(video, sqlStr)
 }
 
-func (d *DbMysql) VideoQueryAfter(video *types.Video, start time.Time) (*[]types.Video, error) {
+func (d *DbMysql) VideoQueryAfter(video *types.Video, start time.Time, page int, count int) (*[]types.Video, error) {
 	fmt.Println("VideoQueryAfter", "timeStart", start)
-	sqlStr := fmt.Sprintf(" upload_time <= %d ", start.Unix())
+	sqlStr := fmt.Sprintf(" upload_time <= %d limit %d", start.Unix(), count)
 	return d.VideoQuery(video, sqlStr)
 }
 
@@ -579,12 +587,17 @@ func (d *DbMysql) VideoQuerySimple(video *types.Video) (types.Video, error) {
 	fmt.Println("VideoQuerySimple")
 	searchVideo, err := d.VideoQuery(video, "")
 
-	if searchVideo != nil {
-		return (*searchVideo)[0], err
-	} else {
-		return *video, err
+	if searchVideo == nil {
+		return *video, errors.New("result is null")
 	}
 
+	if len(*searchVideo) == 0 {
+		fmt.Println(*video)
+		return *video, errors.New("result is null")
+	} else {
+		fmt.Println((*searchVideo)[0])
+		return (*searchVideo)[0], err
+	}
 }
 
 func (d *DbMysql) VideoDelete(video *types.Video) error {
@@ -691,21 +704,21 @@ func (d *DbMysql) VideoTransactionQuery(vt *types.VideoTransaction, sqls string)
 	return &res, nil
 }
 
-func (d *DbMysql) VideoTransactionQueryBetween(transaction *types.VideoTransaction, start time.Time, end time.Time) (*[]types.VideoTransaction, error) {
+func (d *DbMysql) VideoTransactionQueryBetween(transaction *types.VideoTransaction, start time.Time, end time.Time, page int, count int) (*[]types.VideoTransaction, error) {
 	fmt.Println("VideoTransactionQueryBetween", "timeStart", start, "timeEnd", end)
-	sqlStr := fmt.Sprintf(" %d <= buy_time <= %d ", start.Unix(), end.Unix())
+	sqlStr := fmt.Sprintf(" %d <= buy_time <= %d limit %d", start.Unix(), end.Unix(), count)
 	return d.VideoTransactionQuery(transaction, sqlStr)
 }
 
-func (d *DbMysql) VideoTransactionQueryAfter(transaction *types.VideoTransaction, time time.Time) (*[]types.VideoTransaction, error) {
+func (d *DbMysql) VideoTransactionQueryAfter(transaction *types.VideoTransaction, time time.Time, page int, count int) (*[]types.VideoTransaction, error) {
 	fmt.Println("VideoTransactionQueryAfter", "time", time)
-	sqlStr := fmt.Sprintf(" %d <= buy_time", time.Unix())
+	sqlStr := fmt.Sprintf(" %d <= buy_time limit %d", time.Unix(), count)
 	return d.VideoTransactionQuery(transaction, sqlStr)
 }
 
-func (d *DbMysql) VideoTransactionQueryBefore(transaction *types.VideoTransaction, time time.Time) (*[]types.VideoTransaction, error) {
+func (d *DbMysql) VideoTransactionQueryBefore(transaction *types.VideoTransaction, time time.Time, page int, count int) (*[]types.VideoTransaction, error) {
 	fmt.Println("VideoTransactionQueryBefore", "time", time)
-	sqlStr := fmt.Sprintf(" buy_time <= %d ", time.Unix())
+	sqlStr := fmt.Sprintf(" buy_time <= %d limit %d", time.Unix(), count)
 	return d.VideoTransactionQuery(transaction, sqlStr)
 }
 
