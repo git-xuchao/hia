@@ -28,7 +28,7 @@ func (d *DbMysql) createAllTables() error {
             user_id_card varchar(64),
             email varchar(64),
             account varchar(128),
-            secret_key varchar(128),
+            secret_key varchar(512),
             ethr_addr varchar(128),
             abi varchar(4096),
             last_update_time timestamp not null default current_timestamp
@@ -176,7 +176,7 @@ func (d *DbMysql) UserUpdate(user *types.User) error {
 	}
 
 	if "" != user.UserType {
-		s += fmt.Sprintf(format, delimiter, "type", user.UserType)
+		s += fmt.Sprintf(format, delimiter, "user_type", user.UserType)
 		delimiter = ","
 	}
 
@@ -211,6 +211,9 @@ func (d *DbMysql) UserUpdate(user *types.User) error {
 	}
 
 	if "" != user.EthAbi {
+		/*
+		 *s += fmt.Sprintf(format, delimiter, "abi", user.EthAbi)
+		 */
 		s += fmt.Sprintf(format, delimiter, "abi", user.EthAbi)
 		delimiter = ","
 	}

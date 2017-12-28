@@ -201,13 +201,15 @@ func (this *EthClient) SetKeyStoreSearchingPath(path string) error {
 }
 
 func (this *EthClient) GetKeyFileName(account string) (string, error) {
+	fmt.Println("keypath\n", this.keyStoreSearchingPath)
 	files, _ := ioutil.ReadDir(this.keyStoreSearchingPath)
 	for _, file := range files {
 		if file.IsDir() {
 			continue
 		} else {
+			fmt.Println(file.Name(), account)
 			if strings.Contains(file.Name(), account) == true {
-				fmt.Println(file.Name())
+				fmt.Println("found key file name\n", file.Name())
 				return file.Name(), nil
 			}
 		}
@@ -216,9 +218,9 @@ func (this *EthClient) GetKeyFileName(account string) (string, error) {
 }
 
 func (this *EthClient) GetKey(account string) (string, error) {
-	fmt.Printf("EthClient GetKey, account:%s", account)
+	fmt.Printf("EthClient GetKey, account:%s\n", account)
 	fileName, _ := this.GetKeyFileName(account)
-	fmt.Printf("Key File Name:%s", fileName)
+	fmt.Printf("Key File Name:%s\n", fileName)
 	if fileName != "" {
 		dat, _ := ioutil.ReadFile(this.keyStoreSearchingPath + "/" + fileName)
 		return string(dat), nil

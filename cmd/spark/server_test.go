@@ -28,13 +28,56 @@ func TestHttpRouter2(t *testing.T) {
 }
 
 func TestHttpRegistUser(t *testing.T) {
-	url := "http://127.0.0.1:8080/users/common"
+	url := "http://127.0.0.1:8080/users/author"
 
 	user := &types.User{
-		UserName: "time",
+		UserName: "author02",
 		Password: "123456",
-		UserID:   1581341302,
-		UserType: "common",
+		UserID:   12311113,
+		UserType: "author",
+	}
+
+	post, err := json.Marshal(user)
+	if err != nil {
+		fmt.Printf("json.marshal failed, err:", err)
+		return
+	}
+
+	fmt.Printf("%s\n", string(post))
+
+	var jsonStr = []byte(post)
+	fmt.Println("jsonStr", jsonStr)
+	fmt.Println("new_str", bytes.NewBuffer(jsonStr))
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
+	// req.Header.Set("X-Custom-Header", "myvalue")
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	fmt.Println("response Status:", resp.Status)
+	fmt.Println("response Headers:", resp.Header)
+	body, _ := ioutil.ReadAll(resp.Body)
+	fmt.Println("response Body:", string(body))
+}
+
+func TestHttpUpdateUser(t *testing.T) {
+	dat, _ := ioutil.ReadFile("./ysdb/copyright_sol_copyright.abi")
+	url := "http://127.0.0.1:8080/update/users"
+
+	user := &types.User{
+		UserName:        "author02",
+		Password:        "123456",
+		UserID:          12311113,
+		UserType:        "author",
+		Email:           "alan@sina.com",
+		EthContractAddr: "0x23063382209741b9a9bf24f4fb861ffcbb8a3292",
+		EthAbi:          string(dat),
 	}
 
 	post, err := json.Marshal(user)
@@ -200,7 +243,7 @@ func TestHttpPurchaceVideo(t *testing.T) {
 }
 
 func TestHttpPlayVideo(t *testing.T) {
-	url := "http://127.0.0.1:8080/videos/abcdefghiklmno.flv?userID=1581341302&url=http://127.0.0.1:8080/videos/abcdefghiklmno.flv"
+	url := "http://127.0.0.1:8080/videos/abcdefghiklmno.flv?userID=1581341302&url=http://127.0.0.1:8080/videos/abcdefghiklmnopk.flv"
 
 	req, err := http.NewRequest("GET", url, bytes.NewBuffer([]byte("")))
 	// req.Header.Set("X-Custom-Header", "myvalue")
@@ -223,7 +266,13 @@ func TestHttpSearchUsers(t *testing.T) {
 	/*
 	 *url := "http://127.0.0.1:8080/record/users?userID=1581341302"
 	 */
-	url := "http://127.0.0.1:8080/record/users?count=2"
+	/*
+	 *url := "http://127.0.0.1:8080/record/users?count=a"
+	 */
+	url := "http://127.0.0.1:8080/record/users"
+	/*
+	 *url := "http://127.0.0.1:8080/record/users?userID=158134130234"
+	 */
 
 	req, err := http.NewRequest("GET", url, bytes.NewBuffer([]byte("")))
 	req.Header.Set("Content-Type", "application/json")
@@ -231,7 +280,9 @@ func TestHttpSearchUsers(t *testing.T) {
 	 *req.Header.Add("Start-Time", "2017-07-27 8:46:15")
 	 *req.Header.Add("End-Time", "2017-12-28 8:46:15")
 	 */
-	req.Header.Add("Start-Time", "2017-12-22 16:08:46")
+	/*
+	 *req.Header.Add("Start-Time", "2017-12-22 16:08:46")
+	 */
 	/*
 	 *req.Header.Add("End-Time", "2017-12-28 8:47:15")
 	 */
@@ -253,7 +304,22 @@ func TestHttpSearchVideos(t *testing.T) {
 	/*
 	 *url := "http://127.0.0.1:8080/record/videos?videoID=23412454326"
 	 */
-	url := "http://127.0.0.1:8080/record/videos?indexType=uploadRecord&userID=987654325"
+	/*
+	 *url := "http://127.0.0.1:8080/record/videos?indexType=uploadRecord&userID=987654325"
+	 */
+	/*
+	 *url := "http://127.0.0.1:8080/record/videos?indexType=uploadRecord&userID=987654325"
+	 */
+	/*
+	 *url := "http://127.0.0.1:8080/record/videos?indexType=uploadRecord&userID=987654325&count=3"
+	 */
+	/*
+	 *url := "http://127.0.0.1:8080/record/videos?indexType=uploadRecord&userID=987654325&count=a"
+	 */
+	/*
+	 *url := "http://127.0.0.1:8080/record/videos?indexType=videoState"
+	 */
+	url := "http://127.0.0.1:8080/record/videos?indexType=videoAttrib&videoID=abcdefgh.flv"
 
 	req, err := http.NewRequest("GET", url, bytes.NewBuffer([]byte("")))
 	req.Header.Set("Content-Type", "application/json")
