@@ -63,16 +63,16 @@ func checkParamaterWhenUploadingVideo(video types.Video) error {
 }
 
 func checkParamaterWhenDeletingingVideo(video types.Video) error {
-	fmt.Println("VideoName:", video.VideoName, ", url:", video.URL, ", UserID:", video.UserID)
-	if video.VideoID == "" || video.URL == "" || video.UserID == 0 {
-		return errors.New("checking  video uploading paramaters error")
+	fmt.Println("VideoID:", video.VideoID, ", url:", video.URL, ", UserID:", video.UserID)
+	if video.VideoID == "" || video.UserID == 0 {
+		return errors.New("checking  video deleteing paramaters error")
 	}
 	return nil
 }
 
 func checkParamaterWhenPurchasingingVideo(video types.Video) error {
 	fmt.Println("VideoName:", video.VideoName, ", url:", video.URL, ", UserID:", video.UserID, "videoID", video.VideoID)
-	if video.VideoID == "" || video.URL == "" || video.UserID == 0 {
+	if video.VideoID == "" || video.UserID == 0 {
 		return errors.New("checking purchasing video paramaters error")
 	}
 	return nil
@@ -80,7 +80,7 @@ func checkParamaterWhenPurchasingingVideo(video types.Video) error {
 
 func checkParamaterWhenplayingVideo(video types.Video) error {
 	fmt.Println("VideoName:", video.VideoName, ", url:", video.URL, ", UserID:", video.UserID, "videoID", video.VideoID)
-	if video.URL == "" || video.UserID == 0 {
+	if video.URL == "" || video.URL == "" || video.UserID == 0 {
 		return errors.New("checking playing video paramaters error")
 	}
 	return nil
@@ -120,7 +120,9 @@ func checkParamaterWhenSearchingVideos(indexType, videoID, userID, timeStart, ti
 			return errors.New("search Videos uploadRecord, userID is not set")
 		}
 	case "videoRanking":
-		return errors.New("search Videos videoRanking, not support yet")
+		/*
+		 *return errors.New("search Videos videoRanking, not support yet")
+		 */
 
 	case "videoAttrib":
 		if videoID == "" {
@@ -166,6 +168,7 @@ func registerUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 		var usersRes *[]types.User
 		var userSearch types.User
 		userSearch.UserID = user.UserID
+		userSearch.UserName = user.UserName
 		usersRes, err = db.UserQuery(&userSearch, "")
 		if usersRes != nil {
 			fmt.Println("user exists")
@@ -183,10 +186,9 @@ func registerUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 		len := len(account)
 		var key string
 		key, err = ethcli.GetKey(account[3 : len-1])
-		fmt.Printf("key :%s", key)
 
 		/*4.write infos to db*/
-		user.EthAccount = account
+		user.EthAccount = account[1 : len-1]
 		user.EthKey = key
 		user.EthKeyFileName, _ = ethcli.GetKeyFileName(account)
 		fmt.Print("user info:\n")
@@ -194,7 +196,7 @@ func registerUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 		err = db.UserAdd(&user)
 		if err != nil {
 			fmt.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
+			w.WriteHeader(http.StatusBadRequest)
 			return
 		} else {
 			/*
@@ -205,11 +207,13 @@ func registerUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 			 *}
 			 */
 			w.WriteHeader(http.StatusCreated)
+			fmt.Fprintf(w, "{}")
 		}
 
 	} else {
 		fmt.Println("json.Unmarshal err")
 		fmt.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
 	}
 }
 
@@ -270,7 +274,9 @@ func uploadVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 		/*2.search if video has uploaded*/
 		var videoRes *[]types.Video
-		videoRes, err = db.VideoQuery(&video, "")
+		var videoSearch types.Video
+		videoSearch.VideoID = video.VideoID
+		videoRes, err = db.VideoQuery(&videoSearch, "")
 		if err != nil {
 			fmt.Println(err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -290,7 +296,13 @@ func uploadVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		resUser, err = db.UserQuerySimple(&user)
 		if err != nil {
 			fmt.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		if resUser.UserType != "author" {
+			fmt.Println(err)
+			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 		fmt.Println("author user info", resUser)
@@ -301,9 +313,15 @@ func uploadVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		ethcli.SetCallMsg(&msg, resUser.EthAccount, resUser.EthContractAddr, "", "", "", nil)
 		result, err := ethcli.CallContractMethodPack(msg, resUser.Password, "uploadVideo", video.URL)
 		if err != nil {
-			fmt.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
+			if err.Error() == "video has been uploaded,please not repeat upload;" {
+				fmt.Println(err)
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			} else {
+				fmt.Println(err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
 		} else {
 			fmt.Printf("result %v\n", result)
 		}
@@ -327,6 +345,7 @@ func uploadVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	} else {
 		fmt.Println("json.Unmarshal err")
 		fmt.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
 	}
 }
 
@@ -372,6 +391,8 @@ func deleteVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 			fmt.Println(err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
+		} else {
+			video.URL = (*videoRes)[0].URL
 		}
 
 		/*3.search author user info*/
@@ -383,6 +404,11 @@ func deleteVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 			return
 		} else {
 			fmt.Println(resUser)
+		}
+		if resUser.UserType != "author" {
+			fmt.Println(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
 		}
 
 		/*4.call contract*/
@@ -409,6 +435,7 @@ func deleteVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	} else {
 		fmt.Println("json.Unmarshal err")
 		fmt.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
 	}
 }
 
@@ -437,6 +464,22 @@ func purchaseVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 		if err != nil {
 			fmt.Println(err)
 			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		/*2.search if user exists*/
+		var usersRes *[]types.User
+		var userSearch types.User
+		userSearch.UserID = video.UserID
+		usersRes, err = db.UserQuery(&userSearch, "")
+		if usersRes == nil {
+			fmt.Println("user not exists")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		if err != nil {
+			fmt.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
@@ -472,6 +515,7 @@ func purchaseVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 			}
 		} else {
 			fmt.Println("search video info", resVideo)
+			video.URL = resVideo.URL
 		}
 
 		/*4.search author user info*/
@@ -533,6 +577,7 @@ func purchaseVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 	} else {
 		fmt.Println("json.Unmarshal err")
 		fmt.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
 	}
 }
 
@@ -575,14 +620,14 @@ func playVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 	transactionSearch.VideoID = videoIDStr
 	transactionsRes, err = db.VideoTransactionQuery(&transactionSearch, "")
-	if err != nil {
-		fmt.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 	if transactionsRes == nil {
 		fmt.Println("user has not purchased this video")
 		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -601,6 +646,11 @@ func playVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		}
 	} else {
 		fmt.Println("search play video info:", resVideo)
+		if resVideo.URL != url || resVideo.VideoID != videoIDStr {
+			fmt.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 
 	/*4.search author user info*/
@@ -861,26 +911,36 @@ func searchVideos(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	}
 
 	/*4.search db*/
-	if timeStartStr != "" && timeEndStr != "" {
-		videosRes, err = db.VideoQueryBetween(&video, timeStart, timeEnd, 0, count)
-		if err != nil {
-			fmt.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-	} else if timeEndStr != "" {
-		videosRes, err = db.VideoQueryBefore(&video, timeEnd, 0, count)
+	if indexTypeStr == "videoRanking" {
+		sqlSlip := fmt.Sprintf("1 ORDER BY plays limit %d", count)
+		videosRes, err = db.VideoQuery(&video, sqlSlip)
 		if err != nil {
 			fmt.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 	} else {
-		videosRes, err = db.VideoQueryAfter(&video, timeStart, 0, count)
-		if err != nil {
-			fmt.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
+		if timeStartStr != "" && timeEndStr != "" {
+			videosRes, err = db.VideoQueryBetween(&video, timeStart, timeEnd, 0, count)
+			if err != nil {
+				fmt.Println(err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+		} else if timeEndStr != "" {
+			videosRes, err = db.VideoQueryBefore(&video, timeEnd, 0, count)
+			if err != nil {
+				fmt.Println(err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+		} else if timeStartStr != "" {
+			videosRes, err = db.VideoQueryAfter(&video, timeStart, 0, count)
+			if err != nil {
+				fmt.Println(err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
 		}
 	}
 

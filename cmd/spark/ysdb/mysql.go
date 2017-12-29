@@ -371,7 +371,7 @@ func (d *DbMysql) UserQueryBefore(user *types.User, time time.Time, page int, co
 
 func (d *DbMysql) UserQuerySimple(user *types.User) (types.User, error) {
 	searchUser, err := d.UserQuery(user, "")
-	if len(*searchUser) == 0 {
+	if searchUser == nil || len(*searchUser) == 0 {
 		return *user, errors.New("result is null")
 	}
 

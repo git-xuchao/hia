@@ -31,9 +31,9 @@ func TestHttpRegistUser(t *testing.T) {
 	url := "http://127.0.0.1:8080/users/author"
 
 	user := &types.User{
-		UserName: "author02",
+		UserName: "author04",
 		Password: "123456",
-		UserID:   12311113,
+		UserID:   12311115,
 		UserType: "author",
 	}
 
@@ -122,15 +122,15 @@ func TestHttpUpdateUser(t *testing.T) {
 }
 
 func TestHttpUploadVideo(t *testing.T) {
-	url := "http://127.0.0.1:8080/videos/abcdefghiklmnop.flv"
+	url := "http://127.0.0.1:8080/videos/abcdefghiklmnopq.flv"
 
 	video := &types.Video{
 		UserID: 987654325,
 		/*
 		 *UserName:  "alan",
 		 */
-		URL:       "http://127.0.0.1:8080/videos/abcdefghiklmnop.flv",
-		VideoName: "abcdefgh.flv",
+		URL:       "http://127.0.0.1:8080/videos/abcdefghiklmnopq.flv",
+		VideoName: "abcdefghiklmnopq.flv",
 	}
 
 	post, err := json.Marshal(video)
@@ -163,14 +163,14 @@ func TestHttpUploadVideo(t *testing.T) {
 }
 
 func TestHttpDeleteVideo(t *testing.T) {
-	url := "http://127.0.0.1:8080/videos/abcdefghiklmno.flv"
+	url := "http://127.0.0.1:8080/videos/abcdefghiklmn.flv"
 
 	video := &types.Video{
 		UserID: 987654325,
 		/*
 		 *UserName:  "alan",
 		 */
-		URL:       "http://127.0.0.1:8080/videos/abcdefghiklmno.flv",
+		URL:       "http://127.0.0.1:8080/videos/abcdefghiklmn.flv",
 		VideoName: "abc.flv",
 	}
 
@@ -204,7 +204,7 @@ func TestHttpDeleteVideo(t *testing.T) {
 }
 
 func TestHttpPurchaceVideo(t *testing.T) {
-	url := "http://127.0.0.1:8080/transaction/abcdefghiklmno.flv"
+	url := "http://127.0.0.1:8080/transaction/abcdefghiklmnopq.flv"
 
 	/*
 	 *video := &types.Video{
@@ -214,15 +214,13 @@ func TestHttpPurchaceVideo(t *testing.T) {
 	 *}
 	 */
 	video := &types.Video{
-		UserID: 1581341302,
+		UserID: 15813413025,
 		/*
 		 *UserName:  "alan",
 		 */
 		/*
 		 *URL:       "http://127.0.0.1:8080/videos/abcdefg.flv",
 		 */
-		URL:       "http://127.0.0.1:8080/videos/abcdefghiklmno.flv",
-		VideoName: "abcde.flv",
 	}
 
 	post, err := json.Marshal(video)
@@ -255,7 +253,7 @@ func TestHttpPurchaceVideo(t *testing.T) {
 }
 
 func TestHttpPlayVideo(t *testing.T) {
-	url := "http://127.0.0.1:8080/videos/abcdefghiklmno.flv?userID=1581341302&url=http://127.0.0.1:8080/videos/abcdefghiklmnopk.flv"
+	url := "http://127.0.0.1:8080/videos/abcdefghiklmnopq.flv?userID=1581341302&url=http://127.0.0.1:8080/videos/abcdefghiklmnopq.flv"
 
 	req, err := http.NewRequest("GET", url, bytes.NewBuffer([]byte("")))
 	// req.Header.Set("X-Custom-Header", "myvalue")
@@ -331,7 +329,10 @@ func TestHttpSearchVideos(t *testing.T) {
 	/*
 	 *url := "http://127.0.0.1:8080/record/videos?indexType=videoState"
 	 */
-	url := "http://127.0.0.1:8080/record/videos?indexType=videoAttrib&videoID=abcdefgh.flv"
+	/*
+	 *url := "http://127.0.0.1:8080/record/videos?indexType=videoAttrib&videoID=abcdefgh.flv"
+	 */
+	url := "http://127.0.0.1:8080/record/videos?indexType=videoRanking"
 
 	req, err := http.NewRequest("GET", url, bytes.NewBuffer([]byte("")))
 	req.Header.Set("Content-Type", "application/json")
