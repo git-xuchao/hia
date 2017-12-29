@@ -297,6 +297,7 @@ func uploadVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 		/*4.call contract method*/
 		ethcli.ConstructAbi2(resUser.EthAbi)
+		fmt.Println("EthAccount", resUser.EthAccount, "EthContractAddr", resUser.EthContractAddr)
 		ethcli.SetCallMsg(&msg, resUser.EthAccount, resUser.EthContractAddr, "", "", "", nil)
 		result, err := ethcli.CallContractMethodPack(msg, resUser.Password, "uploadVideo", video.URL)
 		if err != nil {

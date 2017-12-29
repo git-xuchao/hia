@@ -71,14 +71,26 @@ func TestHttpUpdateUser(t *testing.T) {
 	url := "http://127.0.0.1:8080/update/users"
 
 	user := &types.User{
-		UserName:        "author02",
+		UserName:        "xusd",
 		Password:        "123456",
-		UserID:          12311113,
+		UserID:          1111111125,
 		UserType:        "author",
 		Email:           "alan@sina.com",
 		EthContractAddr: "0x23063382209741b9a9bf24f4fb861ffcbb8a3292",
 		EthAbi:          string(dat),
 	}
+
+	/*
+	 *user := &types.User{
+	 *    UserName:        "author01",
+	 *    Password:        "123456",
+	 *    UserID:          1231111,
+	 *    UserType:        "author",
+	 *    Email:           "alan@sina.com",
+	 *    EthContractAddr: "0x23063382209741b9a9bf24f4fb861ffcbb8a3292",
+	 *    EthAbi:          string(dat),
+	 *}
+	 */
 
 	post, err := json.Marshal(user)
 	if err != nil {
@@ -110,14 +122,14 @@ func TestHttpUpdateUser(t *testing.T) {
 }
 
 func TestHttpUploadVideo(t *testing.T) {
-	url := "http://127.0.0.1:8080/videos/abcdefghiklmno.flv"
+	url := "http://127.0.0.1:8080/videos/abcdefghiklmnop.flv"
 
 	video := &types.Video{
 		UserID: 987654325,
 		/*
 		 *UserName:  "alan",
 		 */
-		URL:       "http://127.0.0.1:8080/videos/abcdefghiklmno.flv",
+		URL:       "http://127.0.0.1:8080/videos/abcdefghiklmnop.flv",
 		VideoName: "abcdefgh.flv",
 	}
 

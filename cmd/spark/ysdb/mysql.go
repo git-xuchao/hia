@@ -165,7 +165,7 @@ func (d *DbMysql) UserAdd(user *types.User) error {
 
 func (d *DbMysql) UserUpdate(user *types.User) error {
 
-	format := "%s %s = \"%v\""
+	format := "%s %s = '%v'"
 	delimiter := " "
 
 	s := "update user set "
