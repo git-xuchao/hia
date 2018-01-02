@@ -20,7 +20,7 @@ import (
 )
 
 func helloCommand(c *cli.Context) error {
-	fmt.Println("run hello command: ", c.Args().First())
+	fmt.Println("run hello world command: ", c.Args().First())
 	return nil
 }
 
