@@ -14,6 +14,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rpc"
 )
 
@@ -175,6 +176,16 @@ func (this *EthClient) SendTransaction(msg ethereum.CallMsg, password string) ([
 	return hex, nil
 }
 
+func (this *EthClient) GetTransactionReceipt(txHash string) (types.Receipt, error) {
+	var hex types.Receipt
+	err := this.client.CallContext(context.Background(), &hex, "eth_getTransactionReceipt", txHash)
+	if err != nil {
+		fmt.Printf("error %v\n", err)
+		return hex, err
+	}
+	return hex, nil
+}
+
 func (this *EthClient) CallContractMethod(msg ethereum.CallMsg, password string, method string, args ...interface{}) ([]byte, error) {
 	data, _ := this.PackMethod(method, args...)
 	msg.Data = data
@@ -263,6 +274,38 @@ func (this *EthClient) ListAccounts() []string {
 	fmt.Printf("slice len=%d, cap=%d", len(accounts), cap(accounts))
 
 	return accounts
+}
+
+func (this *EthClient) StartMining() error {
+	err := this.Call(nil, "miner_start", 4)
+	if err != nil {
+		fmt.Printf("error %v\n", err)
+		return err
+	}
+
+	return err
+}
+
+func (this *EthClient) StopMining() error {
+	err := this.Call(nil, "miner_stop")
+	if err != nil {
+		fmt.Printf("error %v\n", err)
+		return err
+	}
+
+	return err
+}
+
+func (this *EthClient) IsMining() (bool, error) {
+	var result bool
+
+	err := this.Call(&result, "eth_mining")
+	if err != nil {
+		fmt.Printf("error %v\n", err)
+		return result, err
+	}
+
+	return result, err
 }
 
 func (this *EthClient) Close() {

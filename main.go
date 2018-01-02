@@ -12,6 +12,7 @@ import (
 	"os"
 
 	"gopkg.in/urfave/cli.v1"
+	"hia/cmd/contract"
 	"hia/cmd/spark"
 	http "hia/http/httpraw"
 	"hia/lab"
@@ -112,6 +113,24 @@ var (
 		Name:  "debug",
 		Usage: "debug flag",
 	}
+
+	contractCommand = cli.Command{
+		Name:    "contract",
+		Aliases: []string{"c"},
+		Usage:   "options for contract compiling and deployment",
+		Subcommands: []cli.Command{
+			{
+				Name:   "total",
+				Usage:  "compile and deploy",
+				Action: contract.RunDeployContractPipeline,
+			},
+			{
+				Name:   "deploy",
+				Usage:  "deploy only",
+				Action: contract.RunDeployContractOnly,
+			},
+		},
+	}
 )
 
 func init() {
@@ -120,6 +139,7 @@ func init() {
 		addCommand,
 		labCommand,
 		sparkCommand,
+		contractCommand,
 	}
 
 	app.Flags = []cli.Flag{
